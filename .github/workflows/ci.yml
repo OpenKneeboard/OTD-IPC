@@ -16,4 +16,31 @@ jobs:
         with:
           vs-version: '[17.2,)'
       - name: Build
-        run: msbuild OTDIPC.sln /p:Configuration="${{matrix.config}}"
+        id: build
+        run: |
+          msbuild OTDIPC.sln /p:Configuration="${{matrix.config}}"
+          $out = "${{runner.temp}}/out"
+          ./copy-artifacts.ps1 `
+            -Configuration ${{matrix.config}} `
+            -Out $out `
+            -BuildNumber $Env::GITHUB_RUN_NUMBER
+          Add-Content $Env::GITHUB_OUTPUT "path=$out"
+          Add-Content $Env::GITHUB_VERSION "version=$(Get-Content $out/version.txt)"
+      - name: Attach zip
+        if: matrix.config != 'Debug'
+        uses: actions/upload-artifact@v3
+        with:
+          name: OpenKneeboard-OTD-IPC-v${{steps.build.version}}
+          path: ${{steps.build.path}}/OpenKneeboard-OTD-IPC.zip
+      - name: Attach test client
+        if: matrix.config != 'Debug'
+        uses: actions/upload-artifact@v3
+        with:
+          name: OpenKneeboard-OTD-IPC-TestClient-v${{steps.build.version}}
+          path: ${{steps.build.path}}/OTDIPC-TestClient.exe
+      - name: Attach debug symbols
+        if: matrix.config != 'Debug'
+        uses: actions/upload-artifact@v3
+        with:
+          name: OpenKneeboard-OTD-IPC-DebugSymbols-v${{steps.build.version}}
+          path: ${{steps.build.path}}/*.pdb
