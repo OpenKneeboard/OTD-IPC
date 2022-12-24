@@ -118,11 +118,28 @@ namespace OTDIPC
                 _writer.Write(bytes);
                 _writer.Flush();
             }
+            catch (IOException)
+            {
+                RestartServer();
+            }
             finally
             {
                 Marshal.FreeCoTaskMem(ptr);
             }
 
+        }
+        void ShutdownServer()
+        {
+            _writer = null;
+            _server?.Close();
+            _server = null;
+            _serverTask = null;
+
+        }
+        void RestartServer()
+        {
+            ShutdownServer();
+            StartServer();
         }
 
         void StartServer()
