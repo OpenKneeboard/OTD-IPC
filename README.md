@@ -35,6 +35,7 @@ A C++20 [example client](OTDIPC-TestClient/OTDIPC-TestClient.cpp) is included.
 | `enum MessageType` | [.h](include/OTD-IPC/MessageType.h) | [.cs](OTDIPC/MessageType.cs) |
 | `struct Header` | [.h](include/OTD-IPC/Header.h) | [.cs](OTDIPC/Header.cs) |
 | ✉️ `struct DeviceInfo` | [.h](include/OTD-IPC/DeviceInfo.h) | [.cs](OTDIPC/DeviceInfo.cs) |
+| ✉️ `struct KeepAlive` | [.h](include/OTD-IPC/KeepAlive.h) | [.cs](OTDIPC/KeepAlive.cs) |
 | ✉️ `struct State` | [.h](include/OTD-IPC/State.h) | [.cs](OTDIPC/State.cs) |
 
 ## License
