@@ -20,16 +20,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Header.h">
+    <ClInclude Include="../include/OTD-IPC/DeviceInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MessageType.h">
+    <ClInclude Include="../include/OTD-IPC/Header.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DeviceInfo.h">
+    <ClInclude Include="../include/OTD-IPC/MessageType.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="State.h">
+    <ClInclude Include="../include/OTD-IPC/State.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

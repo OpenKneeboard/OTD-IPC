@@ -12,8 +12,8 @@
 #include <Unknwn.h>
 #include <winrt/base.h>
 
-#include "DeviceInfo.h"
-#include "State.h"
+#include <OTD-IPC/DeviceInfo.h>
+#include <OTD-IPC/State.h>
 
 void DumpMessage(const OTDIPC::Messages::DeviceInfo* const info) {
 	if (!info->isValid) {
