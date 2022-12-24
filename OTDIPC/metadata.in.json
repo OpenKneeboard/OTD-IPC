@@ -1,0 +1,9 @@
+{
+	"Name": "OpenKneeboard OTD-IPC",
+	"Owner": "Fred Emmott",
+	"RepositoryUrl": "https://github.com/OpenKneeboard/OTD-IPC",
+	"Description": "A background-exclusive Output Mode for integrated apps",
+	"LicenseIdentifier": "ISC",
+	"SupportedDriverVersion": "0.6.0.4",
+	"PluginVersion": "@PLUGIN_VERSION@"
+}
