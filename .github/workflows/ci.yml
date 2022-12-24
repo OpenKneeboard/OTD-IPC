@@ -23,9 +23,9 @@ jobs:
           ./copy-artifacts.ps1 `
             -Configuration ${{matrix.config}} `
             -Out $out `
-            -BuildNumber $Env::GITHUB_RUN_NUMBER
-          Add-Content $Env::GITHUB_OUTPUT "path=$out"
-          Add-Content $Env::GITHUB_VERSION "version=$(Get-Content $out/version.txt)"
+            -BuildNumber $Env:GITHUB_RUN_NUMBER
+          Add-Content $Env:GITHUB_OUTPUT "path=$out"
+          Add-Content $Env:GITHUB_VERSION "version=$(Get-Content $out/version.txt)"
       - name: Attach zip
         if: matrix.config != 'Debug'
         uses: actions/upload-artifact@v3
