@@ -14,7 +14,7 @@ Support may be available from the community via [Discord].
 
 Communication is over a named pipe in message mode. The named pipe is called:
 - `"com.fredemmott.openkneeboard.OTDIPC/v0.1"` in .Net named pipe APIs
-- `"\\\\.\\pipe\\com.fredemmott.openkneeboard.OTDIPC/v0.1"` when using `CreateFile()` or similar APIs, e.g. in C++
+- `"\\.\pipe\com.fredemmott.openkneeboard.OTDIPC/v0.1"` when using `CreateFile()` or similar APIs, e.g. in C++
 
 One client is supported at a time - this is intended to be an exclusive mode.
 
@@ -25,6 +25,8 @@ Implementations SHOULD verify that the message size is the same as the size in t
 If a device is connected, the server will send a `DeviceInfo` message when a client connects to the named pipe.
 
 If state is available, the server will send a `State` message when a client connects to the named pipe.
+
+A C++20 [example client](OTDIPC-TestClient/OTDIPC-TestClient.cpp) is included.
 
 ### Data types
 
