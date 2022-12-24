@@ -9,8 +9,6 @@ jobs:
         config: [Release, Debug]
     steps:
       - uses: actions/checkout@v2
-        with:
-          path: source
       - name: Fetch nuget packages
         run: dotnet restore
       - name: Build
