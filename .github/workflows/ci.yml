@@ -30,17 +30,17 @@ jobs:
         if: matrix.config != 'Debug'
         uses: actions/upload-artifact@v3
         with:
-          name: OpenKneeboard-OTD-IPC-v${{steps.build.version}}
-          path: ${{steps.build.path}}/OpenKneeboard-OTD-IPC.zip
+          name: OpenKneeboard-OTD-IPC-v${{steps.build.outputs.version}}
+          path: ${{steps.build.outputs.path}}/OpenKneeboard-OTD-IPC.zip
       - name: Attach test client
         if: matrix.config != 'Debug'
         uses: actions/upload-artifact@v3
         with:
-          name: OpenKneeboard-OTD-IPC-TestClient-v${{steps.build.version}}
-          path: ${{steps.build.path}}/OTDIPC-TestClient.exe
+          name: OpenKneeboard-OTD-IPC-TestClient-v${{steps.build.outputs.version}}
+          path: ${{steps.build.outputs.path}}/OTDIPC-TestClient.exe
       - name: Attach debug symbols
         if: matrix.config != 'Debug'
         uses: actions/upload-artifact@v3
         with:
-          name: OpenKneeboard-OTD-IPC-DebugSymbols-v${{steps.build.version}}
-          path: ${{steps.build.path}}/*.pdb
+          name: OpenKneeboard-OTD-IPC-DebugSymbols-v${{steps.build.outputs.version}}
+          path: ${{steps.build.outputs.path}}/*.pdb
