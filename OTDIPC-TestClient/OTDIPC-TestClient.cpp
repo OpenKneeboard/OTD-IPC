@@ -55,7 +55,7 @@ void DumpMessage(const OTDIPC::Messages::State* const state) {
 	}
 
 	std::cout << std::format(
-		"{:04x}{:04x} -> ({}, {}, {}) {} (near: {})\n"
+		"{:04x}-{:04x} -> ({}, {}, {}) {} (near: {})\n"
 		"  Pen: {}\n"
 		"  Aux: {}",
 		state->vid,

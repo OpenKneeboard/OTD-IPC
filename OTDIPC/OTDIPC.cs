@@ -85,14 +85,23 @@ namespace OTDIPC
             set
             {
                 _tablet = value;
+                _deviceInfo = new();
                 _deviceInfo.Name = _tablet.Properties.Name;
                 var specs = _tablet.Properties.Specifications.Digitizer;
                 _deviceInfo.MaxX = specs.MaxX;
                 _deviceInfo.MaxY = specs.MaxY;
                 _deviceInfo.MaxPressure = _tablet.Properties.Specifications.Pen.MaxPressure;
                 _deviceInfo.IsValid = true;
+
+                var id = _tablet.Identifiers.First();
+                if (id != null) {
+                    _deviceInfo.Header.VID = (UInt16) id.VendorID;
+                    _deviceInfo.Header.PID = (UInt16) id.ProductID;
+                }
+
                 _state = new();
-                // TODO: update VID and PID in message structs
+                _state.Header.VID = _deviceInfo.Header.VID;
+                _state.Header.PID = _deviceInfo.Header.PID;
                 SendMessage(_deviceInfo);
             }
         }
