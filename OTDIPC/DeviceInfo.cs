@@ -9,7 +9,10 @@ namespace OTDIPC
         {
         }
 
-        public Header Header = new() { MessageType = MessageType.DeviceInfo };
+        public Header Header = new() {
+            MessageType = MessageType.DeviceInfo,
+            Size = (UInt32) Marshal.SizeOf(typeof(DeviceInfo)),
+        };
 
         public bool IsValid = false;
         public float MaxX = 0;

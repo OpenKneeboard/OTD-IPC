@@ -107,6 +107,10 @@ int main()
 
 	DWORD bytesRead {};
 	while (ReadFile(connection.get(), buffer, sizeof(buffer), &bytesRead, nullptr)) {
+		if (bytesRead != header->size) {
+			std::cerr << "header->size != packet size - is named pipe in message mode?" << std::endl;
+			return 1;
+		}
 		switch (header->messageType) {
 			case MessageType::DeviceInfo:
 				DumpMessage<DeviceInfo>(header, static_cast<size_t>(bytesRead));
