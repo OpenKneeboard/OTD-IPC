@@ -59,6 +59,6 @@ $compress = @{
 Compress-Archive @compress
 Remove-Item $metadataJson
 
-Copy-Item OTDIPC/bin/$Configuration/net6.0/*.pdb out/
-Copy-Item $Platform/$Configuration/*.pdb out/
-Copy-Item $Platform/$Configuration/*.exe out/
+Copy-Item OTDIPC/bin/$Configuration/net6.0/*.pdb $Out
+Copy-Item $Platform/$Configuration/*.pdb $Out
+Copy-Item $Platform/$Configuration/*.exe $Out
