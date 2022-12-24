@@ -120,6 +120,7 @@ namespace OTDIPC
             }
             catch (IOException)
             {
+                System.Diagnostics.Debug.WriteLine("Error writing to named pipe, restarting server");
                 RestartServer();
             }
             finally
@@ -146,7 +147,7 @@ namespace OTDIPC
         {
             if (_serverTask is not null)
             {
-            System.Diagnostics.Debug.WriteLine("Already have named pipe server");
+                System.Diagnostics.Debug.WriteLine("Already have named pipe server");
                 return;
             }
             System.Diagnostics.Debug.WriteLine("Starting server task");
