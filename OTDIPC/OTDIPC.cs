@@ -91,6 +91,7 @@ namespace OTDIPC
                 _deviceInfo.MaxY = specs.MaxY;
                 _deviceInfo.MaxPressure = _tablet.Properties.Specifications.Pen.MaxPressure;
                 _deviceInfo.IsValid = true;
+                _state = new();
                 // TODO: update VID and PID in message structs
                 SendMessage(_deviceInfo);
             }
