@@ -17,6 +17,7 @@
 
 #include <OTD-IPC/DeviceInfo.h>
 #include <OTD-IPC/Ping.h>
+#include <OTD-IPC/NamedPipePath.h>
 #include <OTD-IPC/State.h>
 
 void DumpMessage(const OTDIPC::Messages::DeviceInfo* const info) {
@@ -98,7 +99,7 @@ int main()
 {
   auto rawHandle =
     CreateFileW(
-      L"\\\\.\\pipe\\com.fredemmott.openkneeboard.OTDIPC/v0.1",
+      OTDIPC::NamedPipePathW,
       GENERIC_READ,
       0,
       nullptr,
