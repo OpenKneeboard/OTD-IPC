@@ -25,7 +25,7 @@ jobs:
             -Out $out `
             -BuildNumber $Env:GITHUB_RUN_NUMBER
           Add-Content $Env:GITHUB_OUTPUT "path=$out"
-          Add-Content $Env:GITHUB_VERSION "version=$(Get-Content $out/version.txt)"
+          Add-Content $Env:GITHUB_OUTPUT "version=$(Get-Content $out/version.txt)"
       - name: Attach zip
         if: matrix.config != 'Debug'
         uses: actions/upload-artifact@v3
