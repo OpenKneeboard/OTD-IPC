@@ -19,11 +19,17 @@ namespace OTDIPC
         public void Consume(IDeviceReport deviceReport)
         {
             bool dirty = false;
+            if (deviceReport is IAbsolutePositionReport absolutePositionReport)
+            {
+                dirty = true;
+                _state.X = absolutePositionReport.Position.X;
+                _state.Y = absolutePositionReport.Position.Y;
+                _state.PositionValid = true;
+            }
             if (deviceReport is ITabletReport tabletReport) {
                 dirty = true;
-                _state.X = tabletReport.Position.X;
-                _state.Y = tabletReport.Position.Y;
                 _state.Pressure = tabletReport.Pressure;
+                _state.PressureValid = true;
                 var buttons = tabletReport.PenButtons;
                 for (int i = 0; i < buttons.Length; i++)
                 {
@@ -36,6 +42,7 @@ namespace OTDIPC
                         _state.PenButtons &= (UInt32) ~(1 << i);
                     }
                 }
+                _state.PenButtonsValid = true;
             }
 
             if (deviceReport is IProximityReport proximityReport)
@@ -43,6 +50,7 @@ namespace OTDIPC
                 dirty = true;
                 _state.NearPromixity = proximityReport.NearProximity;
                 _state.HoverDistance = proximityReport.HoverDistance;
+                _state.ProximityValid = true;
             }
 
             if (deviceReport is IAuxReport auxReport)
@@ -60,6 +68,7 @@ namespace OTDIPC
                         _state.AuxButtons &= (UInt32) ~(1 << i);
                     }
                 }
+                _state.AuxButtonsValid = true;
             }
 
             if (dirty)
