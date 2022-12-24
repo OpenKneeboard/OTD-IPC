@@ -40,6 +40,7 @@ If (!(Test-Path $Out)) {
 }
 
 $pluginVersion = "0.0.1.${BuildNumber}"
+Set-Content $Out/version.txt -Value $pluginVersion
 
 $metadataJson = "${Out}/metadata.json"
 
@@ -56,3 +57,8 @@ $compress = @{
   Force = $True
 }
 Compress-Archive @compress
+Remove-Item $metadataJson
+
+Copy-Item OTDIPC/bin/$Configuration/net6.0/*.pdb out/
+Copy-Item $Platform/$Configuration/*.pdb out/
+Copy-Item $Platform/$Configuration/*.exe out/
