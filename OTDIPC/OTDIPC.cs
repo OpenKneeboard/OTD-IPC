@@ -1,4 +1,5 @@
-﻿using OpenTabletDriver.Plugin.Attributes;
+﻿using OpenTabletDriver.Plugin;
+using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Tablet;
 using System.IO.Pipes;
@@ -7,7 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace OTDIPC
 {
-    [PluginName("OpenKneeboard (OTDIPC)")]
+    [PluginName("OpenKneeboard (OTD-IPC)"), SupportedPlatformAttribute(PluginPlatform.Windows)]
     public class OTDIPC : IOutputMode
     {
         State _state = new();
@@ -175,6 +176,10 @@ namespace OTDIPC
 
         async Task RunServerAsync() {
             System.Diagnostics.Debug.WriteLine("Initializing named pipe server");
+            // Windows-specific because of using PipeTransmissionMode.Message; there's a Size field in the header, so it's unneeded,
+            // but:
+            // - it simplifies client code
+            // - this is only tested on Windows for now anyway
             _server = new NamedPipeServerStream("com.fredemmott.openkneeboard.OTDIPC/v0.1", PipeDirection.Out, 1, PipeTransmissionMode.Message);
             await _server.WaitForConnectionAsync();
             _writer = new BinaryWriter(_server);
