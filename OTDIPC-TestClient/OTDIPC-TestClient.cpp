@@ -16,6 +16,7 @@
 #include <winrt/base.h>
 
 #include <OTD-IPC/DeviceInfo.h>
+#include <OTD-IPC/KeepAlive.h>
 #include <OTD-IPC/State.h>
 
 void DumpMessage(const OTDIPC::Messages::DeviceInfo* const info) {
@@ -72,6 +73,14 @@ void DumpMessage(const OTDIPC::Messages::State* const state) {
     auxButtons) << std::endl;
 }
 
+void DumpMessage(const OTDIPC::Messages::KeepAlive* const msg) {
+  std::cout << std::format(
+    "{:04x}-{:04x} KEEPALIVE {:#016x}",
+    msg->vid,
+    msg->pid,
+    msg->sequenceNumber) << std::endl;
+}
+
 template<std::derived_from<OTDIPC::Messages::Header> T>
 void DumpMessage(const OTDIPC::Messages::Header* const header, size_t size) {
   if (size < sizeof(T)) {
@@ -120,6 +129,9 @@ int main()
         break;
       case MessageType::State:
         DumpMessage<State>(header, static_cast<size_t>(bytesRead));
+        break;
+      case MessageType::KeepAlive:
+        DumpMessage<KeepAlive>(header, static_cast<size_t>(bytesRead));
         break;
     }
   }

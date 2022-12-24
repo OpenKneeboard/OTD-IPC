@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace OTDIPC
 {
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [StructLayout(LayoutKind.Sequential, Pack = 0)]
     struct State
     {
         public State()

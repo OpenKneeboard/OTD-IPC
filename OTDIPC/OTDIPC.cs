@@ -18,9 +18,11 @@ namespace OTDIPC
     {
         State _state = new();
         DeviceInfo _deviceInfo = new();
+        KeepAlive _keepAlive = new();
         NamedPipeServerStream? _server;
         Task? _serverTask;
         BinaryWriter? _writer;
+        Timer? _timer;
 
         public void Consume(IDeviceReport deviceReport)
         {
@@ -90,10 +92,10 @@ namespace OTDIPC
 
         public event Action<IDeviceReport>? Emit;
 
-        public IList<IPositionedPipelineElement<IDeviceReport>> Elements { get; set; }
+        public IList<IPositionedPipelineElement<IDeviceReport>>? Elements { get; set; }
 
 
-        TabletReference _tablet;
+        TabletReference? _tablet;
         public TabletReference Tablet
         {
             get => _tablet;
@@ -158,6 +160,8 @@ namespace OTDIPC
         {
             _writer = null;
             _server?.Close();
+            _timer?.Dispose();
+            _timer = null;
             _server = null;
             _serverTask = null;
 
@@ -193,6 +197,13 @@ namespace OTDIPC
                 SendMessage(_deviceInfo);
                 SendMessage(_state);
             }
+            _timer = new ((_) => { this.KeepAlive(); }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+
+        }
+
+        void KeepAlive() {
+            _keepAlive.SequenceNumber++;
+            SendMessage(_keepAlive);
         }
     }
 }

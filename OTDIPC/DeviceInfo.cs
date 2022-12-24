@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace OTDIPC
 {
-    [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Unicode)]
+    [StructLayout(LayoutKind.Sequential, Pack = 0, CharSet = CharSet.Unicode)]
     struct DeviceInfo
     {
         public DeviceInfo()

@@ -11,5 +11,6 @@ namespace OTDIPC
     {
         DeviceInfo = 1,
         State = 2,
+        KeepAlive = 3,
     }
 }
