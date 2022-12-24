@@ -6,10 +6,10 @@ using System.Numerics;
 
 namespace OTDRPC
 {
-    [PluginName("OpenKneeboard (IPC)")]
-    public class OTDRPC : IOutputMode
+    [PluginName("OpenKneeboard (OTDIPC)")]
+    public class OTDIPC : IOutputMode
     {
-        public OTDRPC() {
+        public OTDIPC() {
             System.Diagnostics.Debug.WriteLine("INIT");
         }
 
