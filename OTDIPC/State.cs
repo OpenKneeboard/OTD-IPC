@@ -9,7 +9,7 @@ namespace OTDIPC
         {
         }
 
-        public Header Header = new Header {  MessageType = MessageType.State };
+        public Header Header = new() {  MessageType = MessageType.State };
 
         public float X = 0;
         public float Y = 0;

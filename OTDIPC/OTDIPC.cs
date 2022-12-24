@@ -1,17 +1,20 @@
-﻿using OpenTabletDriver;
-using OpenTabletDriver.Plugin.Attributes;
+﻿using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Tablet;
-using OTDIPC;
+using System.IO.Pipes;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
-namespace OTDRPC
+namespace OTDIPC
 {
     [PluginName("OpenKneeboard (OTDIPC)")]
     public class OTDIPC : IOutputMode
     {
         State _state = new();
         DeviceInfo _deviceInfo = new();
+        NamedPipeServerStream? _server;
+        Task? _serverTask;
+        BinaryWriter? _writer;
 
         public void Consume(IDeviceReport deviceReport)
         {
@@ -59,11 +62,10 @@ namespace OTDRPC
                 }
             }
 
-            if (!dirty)
+            if (dirty)
             {
-                return;
+                SendMessage(_state);
             }
-            // TODO: send message
         }
 
         public void Read(IDeviceReport deviceReport)
@@ -90,11 +92,60 @@ namespace OTDRPC
                 _deviceInfo.MaxPressure = _tablet.Properties.Specifications.Pen.MaxPressure;
                 _deviceInfo.IsValid = true;
                 // TODO: update VID and PID in message structs
-                // TODO: send DeviceInfo message
+                SendMessage(_deviceInfo);
             }
         }
 
-
         public Matrix3x2 TransformationMatrix => Matrix3x2.Identity;
+
+        void SendMessage<T>(T message) where T : struct
+        {
+            StartServer();
+            if (_writer is null)
+            {
+                return;
+            }
+
+            IntPtr ptr = IntPtr.Zero;
+            try
+            {
+                var size = Marshal.SizeOf(typeof(T));
+                byte[] bytes = new byte[size];
+
+                ptr = Marshal.AllocCoTaskMem(size);
+                Marshal.StructureToPtr(message, ptr, false);
+                Marshal.Copy(ptr, bytes, 0, size);
+                _writer.Write(bytes);
+                _writer.Flush();
+            }
+            finally
+            {
+                Marshal.FreeCoTaskMem(ptr);
+            }
+
+        }
+
+        void StartServer()
+        {
+            if (_serverTask is not null)
+            {
+            System.Diagnostics.Debug.WriteLine("Already have named pipe server");
+                return;
+            }
+            System.Diagnostics.Debug.WriteLine("Starting server task");
+            _serverTask = RunServerAsync();
+        }
+
+        async Task RunServerAsync() {
+            System.Diagnostics.Debug.WriteLine("Initializing named pipe server");
+            _server = new NamedPipeServerStream("com.fredemmott.openkneeboard.OTDIPC/v0.1", PipeDirection.Out, 1, PipeTransmissionMode.Message);
+            await _server.WaitForConnectionAsync();
+            _writer = new BinaryWriter(_server);
+            if (_deviceInfo.IsValid)
+            {
+                SendMessage(_deviceInfo);
+                SendMessage(_state);
+            }
+        }
     }
 }
