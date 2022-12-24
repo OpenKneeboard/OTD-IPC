@@ -28,10 +28,12 @@ If state is available, the server will send a `State` message when a client conn
 
 ### Data types
 
-- MessageType enum: [C++](include/OTD-IPC/MessageType.h) - [C#](OTDIPC/MessageType.cs)
-- Header: [C++](include/OTD-IPC/Header.h) - [C#](OTDIPC/Header.cs)
-- DeviceInfo message: [C++](include/OTD-IPC/DeviceInfo.h) - [C#](OTDIPC/DeviceInfo.cs)
-- State message: [C++](include/OTD-IPC/State.h) - [C#](OTDIPC/State.cs)
+| Type | C++ | C# |
+|------|-----|----|
+| `enum MessageType` | [.h](include/OTD-IPC/MessageType.h) | [.cs](OTDIPC/MessageType.cs) |
+| `struct Header` | [.h](include/OTD-IPC/Header.h) | [.cs](OTDIPC/Header.cs) |
+| `struct DeviceInfo` (message) | [.h](include/OTD-IPC/DeviceInfo.h) | [.cs](OTDIPC/DeviceInfo.cs) |
+| `struct State` (message) | [.h](include/OTD-IPC/State.h) | [.cs](OTDIPC/State.cs) |
 
 ## License
 
