@@ -18,7 +18,7 @@ namespace OTDIPC
     {
         State _state = new();
         DeviceInfo _deviceInfo = new();
-        KeepAlive _keepAlive = new();
+        Ping _Ping = new();
         NamedPipeServerStream? _server;
         Task? _serverTask;
         BinaryWriter? _writer;
@@ -197,13 +197,13 @@ namespace OTDIPC
                 SendMessage(_deviceInfo);
                 SendMessage(_state);
             }
-            _timer = new ((_) => { this.KeepAlive(); }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+            _timer = new ((_) => { this.Ping(); }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
 
         }
 
-        void KeepAlive() {
-            _keepAlive.SequenceNumber++;
-            SendMessage(_keepAlive);
+        void Ping() {
+            _Ping.SequenceNumber++;
+            SendMessage(_Ping);
         }
     }
 }

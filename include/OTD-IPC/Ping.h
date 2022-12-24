@@ -9,8 +9,8 @@
 
 namespace OTDIPC::Messages {
 
-	struct KeepAlive : Header {
-		static constexpr MessageType MESSAGE_TYPE = MessageType::KeepAlive;
+	struct Ping : Header {
+		static constexpr MessageType MESSAGE_TYPE = MessageType::Ping;
 		uint64_t sequenceNumber;
 	};
 

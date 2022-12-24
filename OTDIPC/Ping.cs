@@ -8,15 +8,15 @@ using System.Runtime.InteropServices;
 namespace OTDIPC
 {
     [StructLayout(LayoutKind.Sequential, Pack = 0, CharSet = CharSet.Unicode)]
-    struct KeepAlive
+    struct Ping
     {
-        public KeepAlive()
+        public Ping()
         {
         }
 
         public Header Header = new() {
-            MessageType = MessageType.KeepAlive,
-            Size = (UInt32) Marshal.SizeOf(typeof(KeepAlive)),
+            MessageType = MessageType.Ping,
+            Size = (UInt32) Marshal.SizeOf(typeof(Ping)),
         };
 
         public UInt64 SequenceNumber = 0;
