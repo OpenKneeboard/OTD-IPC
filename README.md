@@ -32,8 +32,8 @@ If state is available, the server will send a `State` message when a client conn
 |------|-----|----|
 | `enum MessageType` | [.h](include/OTD-IPC/MessageType.h) | [.cs](OTDIPC/MessageType.cs) |
 | `struct Header` | [.h](include/OTD-IPC/Header.h) | [.cs](OTDIPC/Header.cs) |
-| `struct DeviceInfo` (message) | [.h](include/OTD-IPC/DeviceInfo.h) | [.cs](OTDIPC/DeviceInfo.cs) |
-| `struct State` (message) | [.h](include/OTD-IPC/State.h) | [.cs](OTDIPC/State.cs) |
+| ✉️ `struct DeviceInfo` | [.h](include/OTD-IPC/DeviceInfo.h) | [.cs](OTDIPC/DeviceInfo.cs) |
+| ✉️ `struct State` | [.h](include/OTD-IPC/State.h) | [.cs](OTDIPC/State.cs) |
 
 ## License
 
