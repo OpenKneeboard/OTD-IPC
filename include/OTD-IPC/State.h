@@ -1,17 +1,7 @@
 /*
  * Copyright (c) 2022 Fred Emmott <fred@fredemmott.com>
  *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * SPDX-License-Identifier: ISC
  */
 #pragma once
 
@@ -19,26 +9,26 @@
 
 namespace OTDIPC::Messages {
 
-	struct State : Header {
-		static constexpr MessageType MESSAGE_TYPE = MessageType::State;
+  struct State : Header {
+    static constexpr MessageType MESSAGE_TYPE = MessageType::State;
 
-		bool positionValid;
-		float x;
-		float y;
+    bool positionValid;
+    float x;
+    float y;
 
-		bool pressureValid;
-		uint32_t pressure;
+    bool pressureValid;
+    uint32_t pressure;
 
-		bool penButtonsValid;
-		uint32_t penButtons;
+    bool penButtonsValid;
+    uint32_t penButtons;
 
-		bool auxButtonsValid;
-		uint32_t auxButtons;
+    bool auxButtonsValid;
+    uint32_t auxButtons;
 
-		bool proximityValid;
-		uint32_t hoverDistance;
-		bool nearProximity;
+    bool proximityValid;
+    uint32_t hoverDistance;
+    bool nearProximity;
 
-	};
+  };
 
 }
