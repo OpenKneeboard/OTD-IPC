@@ -4,6 +4,10 @@ This is a filter plugin for [OpenTabletDriver], allowing 1 program at a time to 
 
 It is primarily intended for use with [OpenKneeboard].
 
+## Getting Started
+
+See [the Getting Started guide](docs/getting-started.md).
+
 ## Getting Help
 
 I make this for my own use, and I share this in the hope others find it useful; I'm not able to commit to support, bug fixes, or feature development.    
