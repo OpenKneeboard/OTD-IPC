@@ -11,7 +11,7 @@ Then, [install OpenTabletDriver](https://opentabletdriver.net/Wiki/Install/Windo
 
 ## Installing OpenKneeboard OTD-IPC
 
-Download `OpenKneeboard-OTC-IPC-vVERSION.zip` from [the latest release](https://github.com/OpenKneeboard/OTD-IPC/releases/) - but don't extract it.
+Download `OpenKneeboard-OTC-IPC-vVERSION.zip` from [the latest release](https://github.com/OpenKneeboard/OTD-IPC/releases/latest) - but don't unzip it.
 
 Open OpenTabletDriver, then open it's plugin manager:
 
