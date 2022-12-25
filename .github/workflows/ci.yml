@@ -44,3 +44,45 @@ jobs:
         with:
           name: OpenKneeboard-OTD-IPC-DebugSymbols-v${{steps.build.outputs.version}}
           path: ${{steps.build.outputs.path}}/*.pdb
+      - name: Create draft release
+        id: create-release
+        if: github.ref_type == 'tag' && matrix.config != 'Debug'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}     
+        with:
+          release_name: ${{github.ref_name}}
+          tag_name: ${{github.ref_name}}
+          draft: true
+          body: "Write release notes here"
+      - name: Attach zip to release
+        if: github.ref_type == 'tag' && matrix.config != 'Debug'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          path: ${{steps.build.outputs.path}}/OpenKneeboard-OTD-IPC.zip
+          asset_path: ${{ steps.create-msi.outputs.MSI_PATH }}
+          asset_name: OpenKneeboard-OTD-IPC-v${{steps.build.outputs.version}}.zip
+          asset_content_type: application/zip
+      - name: Attach test client to release
+        if: github.ref_type == 'tag' && matrix.config != 'Debug'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_name: OpenKneeboard-OTD-IPC-TestClient-v${{steps.build.outputs.version}}.exe
+          asset_path: ${{steps.build.outputs.path}}/OTDIPC-TestClient.exe
+          asset_content_type: application/x-ms-download
+      - name: Attach debug symbols
+        if: github.ref_type == 'tag' && matrix.config != 'Debug'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_name: OpenKneeboard-OTD-IPC-DebugSymbols-v${{steps.build.outputs.version}}.zip
+          asset_path: ${{steps.build.outputs.path}}/DebugSymbols.zip
+          asset_content_type: application/zip
