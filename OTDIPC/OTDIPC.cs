@@ -18,23 +18,20 @@ namespace OTDIPC
     {
         State _state = new();
         DeviceInfo _deviceInfo = new();
-        Ping _Ping = new();
-        NamedPipeServerStream? _server;
-        Task? _serverTask;
-        BinaryWriter? _writer;
-        Timer? _timer;
 
-        static WeakReference<OTDIPC>? _instance;
+        static Server _server = new();
 
         public OTDIPC() {
-            // Need to tear it down as we can only have one server at a time
-            OTDIPC? prev = null;
-            _instance?.TryGetTarget(out prev);
-            if (prev != null) {
-                prev.ShutdownServer();
-            }
+            _server.ClearEventSubscribers();
+            _server.ClientConnected += () => { this.OnClientConnected(); };
+        }
 
-            _instance = new(this);
+        void OnClientConnected() {
+            if (!_deviceInfo.IsValid) {
+                return;
+            }
+            _server.SendMessage(_deviceInfo);
+            _server.SendMessage(_state);
         }
 
         public void Consume(IDeviceReport deviceReport)
@@ -94,7 +91,7 @@ namespace OTDIPC
 
             if (dirty)
             {
-                SendMessage(_state);
+                _server.SendMessage(_state);
             }
         }
 
@@ -133,94 +130,12 @@ namespace OTDIPC
                 _state.Header.VID = _deviceInfo.Header.VID;
                 _state.Header.PID = _deviceInfo.Header.PID;
 
-                RestartServer();
+                _server.SendMessage(_deviceInfo);
+                _server.SendMessage(_state);
             }
         }
 
         public Matrix3x2 TransformationMatrix => Matrix3x2.Identity;
-
-        void SendMessage<T>(T message) where T : struct
-        {
-            StartServer();
-            if (_writer is null)
-            {
-                return;
-            }
-
-            IntPtr ptr = IntPtr.Zero;
-            try
-            {
-                var size = Marshal.SizeOf(typeof(T));
-                byte[] bytes = new byte[size];
-
-                ptr = Marshal.AllocCoTaskMem(size);
-                Marshal.StructureToPtr(message, ptr, false);
-                Marshal.Copy(ptr, bytes, 0, size);
-                _writer.Write(bytes);
-                _writer.Flush();
-            }
-            catch (IOException)
-            {
-                System.Diagnostics.Debug.WriteLine("Error writing to named pipe, restarting server");
-                RestartServer();
-            }
-            finally
-            {
-                Marshal.FreeCoTaskMem(ptr);
-            }
-
-        }
-        void ShutdownServer()
-        {
-            _writer = null;
-            _server?.Close();
-            _timer?.Dispose();
-            _timer = null;
-            _server = null;
-            _serverTask = null;
-
-        }
-        void RestartServer()
-        {
-            ShutdownServer();
-            StartServer();
-        }
-
-        void StartServer()
-        {
-            if (_serverTask is not null)
-            {
-                System.Diagnostics.Debug.WriteLine("Already have named pipe server");
-                return;
-            }
-            System.Diagnostics.Debug.WriteLine("Starting server task");
-            _serverTask = RunServerAsync();
-        }
-
-        async Task RunServerAsync() {
-            System.Diagnostics.Debug.WriteLine("Initializing named pipe server");
-            // Windows-specific because of using PipeTransmissionMode.Message; there's a Size field in the header, so it's unneeded,
-            // but:
-            // - it simplifies client code
-            // - this is only tested on Windows for now anyway
-            _server = new NamedPipeServerStream("com.fredemmott.openkneeboard.OTDIPC/v0.1", PipeDirection.Out, 1, PipeTransmissionMode.Message);
-            await _server.WaitForConnectionAsync();
-            _writer = new BinaryWriter(_server);
-            if (_deviceInfo.IsValid)
-            {
-                SendMessage(_deviceInfo);
-                SendMessage(_state);
-            }
-            _timer = new ((_) => { this.Ping(); }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
-
-        }
-
-        void Ping() {
-            _Ping.SequenceNumber++;
-            SendMessage(_Ping);
-        }
-
-
     }
 
 }
