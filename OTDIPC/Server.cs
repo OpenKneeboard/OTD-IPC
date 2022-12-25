@@ -18,7 +18,6 @@ namespace OTDIPC
     {
         Ping _Ping = new();
         NamedPipeServerStream? _server;
-        BinaryWriter? _writer;
         Timer? _timer;
         bool _waitingForConnection;
         bool _connected;
@@ -29,7 +28,7 @@ namespace OTDIPC
 
         public void SendMessage<T>(T message) where T : struct
         {
-            if (_writer is null)
+            if (_server == null)
             {
                 StartServer();
                 return;
@@ -44,22 +43,27 @@ namespace OTDIPC
                 ptr = Marshal.AllocCoTaskMem(size);
                 Marshal.StructureToPtr(message, ptr, false);
                 Marshal.Copy(ptr, bytes, 0, size);
-                _writer.Write(bytes);
-                _writer.Flush();
+                _server.Write(bytes);
             }
             catch (IOException)
             {
-                if (_connected) {
-                    System.Diagnostics.Debug.WriteLine("Error writing to named pipe, resetting server");
-                    _connected = false;
-                    StartServer();
-                }
+                OnFailedWrite();
             }
             finally
             {
                 Marshal.FreeCoTaskMem(ptr);
             }
+        }
 
+        void OnFailedWrite()
+        {
+            if (!_connected)
+            {
+                return;
+            }
+            System.Diagnostics.Debug.WriteLine("Error writing to named pipe, resetting server");
+            _connected = false;
+            StartServer();
         }
 
         public bool HaveClient { get => _connected; }
@@ -74,18 +78,17 @@ namespace OTDIPC
 
             _waitingForConnection = true;
 
-            _writer?.Close();
-            _writer = null;
-
             _server?.Close();
+            _server = null;
+
             System.Diagnostics.Debug.WriteLine("Starting named pipe server");
-            _server = new NamedPipeServerStream("com.fredemmott.openkneeboard.OTDIPC/v0.1", PipeDirection.Out, 1, PipeTransmissionMode.Message);
+            var server = new NamedPipeServerStream("com.fredemmott.openkneeboard.OTDIPC/v0.1", PipeDirection.Out, 1, PipeTransmissionMode.Message);
             System.Diagnostics.Debug.WriteLine("Waiting for connection");
-            await _server.WaitForConnectionAsync();
+            await server.WaitForConnectionAsync();
+            _server = server;
             _waitingForConnection = false;
             _connected = true;
 
-            _writer = new BinaryWriter(_server);
             ClientConnected?.Invoke();
         }
 
