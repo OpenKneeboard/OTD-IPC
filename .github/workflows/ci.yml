@@ -62,9 +62,8 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
-          path: ${{steps.build.outputs.path}}/OpenKneeboard-OTD-IPC.zip
-          asset_path: ${{ steps.create-msi.outputs.MSI_PATH }}
           asset_name: OpenKneeboard-OTD-IPC-v${{steps.build.outputs.version}}.zip
+          asset_path: ${{steps.build.outputs.path}}/OpenKneeboard-OTD-IPC.zip
           asset_content_type: application/zip
       - name: Attach test client to release
         if: github.ref_type == 'tag' && matrix.config != 'Debug'
