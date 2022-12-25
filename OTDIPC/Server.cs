@@ -60,9 +60,6 @@ namespace OTDIPC
         }
 
         public event Action? ClientConnected;
-        public void ClearEventSubscribers() {
-            ClientConnected = null;
-        }
         async Task StartServer()
         {
             if (_waitingForConnection)
