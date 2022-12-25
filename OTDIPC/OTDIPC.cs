@@ -24,6 +24,19 @@ namespace OTDIPC
         BinaryWriter? _writer;
         Timer? _timer;
 
+        static WeakReference<OTDIPC>? _instance;
+
+        public OTDIPC() {
+            // Need to tear it down as we can only have one server at a time
+            OTDIPC? prev = null;
+            _instance?.TryGetTarget(out prev);
+            if (prev != null) {
+                prev.ShutdownServer();
+            }
+
+            _instance = new(this);
+        }
+
         public void Consume(IDeviceReport deviceReport)
         {
             bool dirty = false;
@@ -119,7 +132,8 @@ namespace OTDIPC
                 _state = new();
                 _state.Header.VID = _deviceInfo.Header.VID;
                 _state.Header.PID = _deviceInfo.Header.PID;
-                SendMessage(_deviceInfo);
+
+                RestartServer();
             }
         }
 
@@ -205,5 +219,8 @@ namespace OTDIPC
             _Ping.SequenceNumber++;
             SendMessage(_Ping);
         }
+
+
     }
+
 }
