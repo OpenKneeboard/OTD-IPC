@@ -62,3 +62,10 @@ Remove-Item $metadataJson
 Copy-Item OTDIPC/bin/$Configuration/net6.0/*.pdb $Out
 Copy-Item $Platform/$Configuration/*.pdb $Out
 Copy-Item $Platform/$Configuration/*.exe $Out
+
+$compress = @{
+  Path = (Get-ChildItem -Path $Out -Filter '*.pdb')
+  DestinationPath = "${Out}/DebugSymbols.zip"
+  Force = $True
+}
+Compress-Archive @compress
