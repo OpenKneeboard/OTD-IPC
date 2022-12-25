@@ -21,6 +21,7 @@ namespace OTDIPC
         BinaryWriter? _writer;
         Timer? _timer;
         bool _waitingForConnection;
+        bool _connected;
 
         public Server() {
             _timer = new ((_) => { this.Ping(); }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
@@ -49,6 +50,7 @@ namespace OTDIPC
             catch (IOException)
             {
                 System.Diagnostics.Debug.WriteLine("Error writing to named pipe, resetting server");
+                _connected = false;
                 StartServer();
             }
             finally
@@ -57,6 +59,8 @@ namespace OTDIPC
             }
 
         }
+
+        public bool HaveClient { get => _connected; }
 
         public event Action? ClientConnected;
         async Task StartServer()
@@ -77,6 +81,7 @@ namespace OTDIPC
             System.Diagnostics.Debug.WriteLine("Waiting for connection");
             await _server.WaitForConnectionAsync();
             _waitingForConnection = false;
+            _connected = true;
 
             _writer = new BinaryWriter(_server);
             ClientConnected?.Invoke();

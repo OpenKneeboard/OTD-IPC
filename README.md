@@ -1,6 +1,6 @@
 # OpenKneeboard OTD-IPC
 
-This is an OutputMode plugin for [OpenTabletDriver], allowing 1 program at a time to directly read the state of the tablet.
+This is a filter plugin for [OpenTabletDriver], allowing 1 program at a time to directly read the state of the tablet. When in use, the active OpenTabletDriver output mode is disabled.
 
 It is primarily intended for use with [OpenKneeboard].
 

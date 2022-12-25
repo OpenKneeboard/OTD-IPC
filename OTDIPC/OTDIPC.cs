@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 namespace OTDIPC
 {
     [PluginName("OpenKneeboard (OTD-IPC)"), SupportedPlatformAttribute(PluginPlatform.Windows)]
-    public class OTDIPC : IOutputMode
+    public class OTDIPC : IPositionedPipelineElement<IDeviceReport>
     {
         State _state = new();
         DeviceInfo _deviceInfo = new();
@@ -33,6 +33,10 @@ namespace OTDIPC
 
         public void Consume(IDeviceReport deviceReport)
         {
+            if (!_server.HaveClient) {
+                Emit?.Invoke(deviceReport);
+                return;
+            }
             bool changed = false;
 
             if (deviceReport is IAbsolutePositionReport absolutePositionReport)
@@ -42,7 +46,9 @@ namespace OTDIPC
                 _state.Y = absolutePositionReport.Position.Y;
                 _state.PositionValid = true;
             }
-            if (deviceReport is ITabletReport tabletReport) {
+
+            if (deviceReport is ITabletReport tabletReport)
+            {
                 changed = true;
                 _state.Pressure = tabletReport.Pressure;
                 _state.PressureValid = true;
@@ -105,17 +111,12 @@ namespace OTDIPC
             _server.SendMessage(_state);
         }
 
-        public void Read(IDeviceReport deviceReport)
-        {
-            Consume(deviceReport);
-        }
-
         public event Action<IDeviceReport>? Emit;
-
-        public IList<IPositionedPipelineElement<IDeviceReport>>? Elements { get; set; }
-
+        public PipelinePosition Position { get => PipelinePosition.Raw; }
 
         TabletReference? _tablet;
+
+        [TabletReference]
         public TabletReference Tablet
         {
             get => _tablet;
@@ -143,8 +144,6 @@ namespace OTDIPC
                 _server.SendMessage(_deviceInfo);
             }
         }
-
-        public Matrix3x2 TransformationMatrix => Matrix3x2.Identity;
     }
 
 }
