@@ -83,12 +83,12 @@ void DumpMessage(const OTDIPC::Messages::Ping* const msg) {
 }
 
 template<std::derived_from<OTDIPC::Messages::Header> T>
-void DumpMessage(const OTDIPC::Messages::Header* const header, size_t size) {
-  if (size < sizeof(T)) {
+void DumpMessage(const OTDIPC::Messages::Header* const header) {
+  if (header->size < sizeof(T)) {
     std::cerr << std::format(
       "Received message type {} of invalid size {} - expected {}",
       static_cast<std::underlying_type_t<const OTDIPC::Messages::MessageType>>(header->messageType),
-      size,
+      header->size,
       sizeof(T)) << std::endl;
     return;
   }
@@ -125,13 +125,13 @@ int main()
     }
     switch (header->messageType) {
       case MessageType::DeviceInfo:
-        DumpMessage<DeviceInfo>(header, static_cast<size_t>(bytesRead));
+        DumpMessage<DeviceInfo>(header);
         break;
       case MessageType::State:
-        DumpMessage<State>(header, static_cast<size_t>(bytesRead));
+        DumpMessage<State>(header);
         break;
       case MessageType::Ping:
-        DumpMessage<Ping>(header, static_cast<size_t>(bytesRead));
+        DumpMessage<Ping>(header);
         break;
     }
   }
