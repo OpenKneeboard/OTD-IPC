@@ -23,7 +23,6 @@ namespace OTDIPC
         bool _waitingForConnection;
 
         public Server() {
-            System.Diagnostics.Debug.WriteLine("Server constructor");
             _timer = new ((_) => { this.Ping(); }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         }
 
@@ -73,16 +72,14 @@ namespace OTDIPC
             _writer = null;
 
             _server?.Close();
-            System.Diagnostics.Debug.WriteLine("Starting named pipe");
+            System.Diagnostics.Debug.WriteLine("Starting named pipe server");
             _server = new NamedPipeServerStream("com.fredemmott.openkneeboard.OTDIPC/v0.1", PipeDirection.Out, 1, PipeTransmissionMode.Message);
             System.Diagnostics.Debug.WriteLine("Waiting for connection");
             await _server.WaitForConnectionAsync();
             _waitingForConnection = false;
 
             _writer = new BinaryWriter(_server);
-            System.Diagnostics.Debug.WriteLine("Invoking callback");
             ClientConnected?.Invoke();
-            System.Diagnostics.Debug.WriteLine("Invoked callback");
         }
 
         void Ping() {
