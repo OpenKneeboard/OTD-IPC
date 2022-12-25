@@ -49,9 +49,11 @@ namespace OTDIPC
             }
             catch (IOException)
             {
-                System.Diagnostics.Debug.WriteLine("Error writing to named pipe, resetting server");
-                _connected = false;
-                StartServer();
+                if (_connected) {
+                    System.Diagnostics.Debug.WriteLine("Error writing to named pipe, resetting server");
+                    _connected = false;
+                    StartServer();
+                }
             }
             finally
             {
