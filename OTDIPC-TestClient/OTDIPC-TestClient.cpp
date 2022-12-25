@@ -97,7 +97,7 @@ void DumpMessage(const OTDIPC::Messages::Header* const header, size_t size) {
 
 int main()
 {
-  auto rawHandle =
+  winrt::file_handle connection{
     CreateFileW(
       OTDIPC::NamedPipePathW,
       GENERIC_READ,
@@ -105,18 +105,17 @@ int main()
       nullptr,
       OPEN_EXISTING,
       0,
-      NULL);
-  if (rawHandle == INVALID_HANDLE_VALUE || !rawHandle) {
+      NULL)};
+  if (!connection) {
     std::cerr << std::format("Failed to open pipe: {}", GetLastError()) << std::endl;
     return 1;
   }
-  winrt::handle connection{ rawHandle };
   char buffer[1024];
 
   using namespace OTDIPC::Messages;
   static_assert(sizeof(buffer) >= sizeof(DeviceInfo));
   static_assert(sizeof(buffer) >= sizeof(State));
-  auto header = reinterpret_cast<const Header* const>(&buffer);
+  auto header = reinterpret_cast<const Header* const>(buffer);
 
   DWORD bytesRead {};
   while (ReadFile(connection.get(), buffer, sizeof(buffer), &bytesRead, nullptr)) {
