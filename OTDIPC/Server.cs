@@ -30,7 +30,7 @@ namespace OTDIPC
         {
             if (_server == null)
             {
-                StartServer();
+                RunServerAsync();
                 return;
             }
 
@@ -43,7 +43,11 @@ namespace OTDIPC
                 ptr = Marshal.AllocCoTaskMem(size);
                 Marshal.StructureToPtr(message, ptr, false);
                 Marshal.Copy(ptr, bytes, 0, size);
-                _server.Write(bytes);
+                WriteAsync(bytes).GetAwaiter().GetResult();
+            }
+            catch (TimeoutException)
+            {
+                OnFailedWrite();
             }
             catch (IOException)
             {
@@ -55,6 +59,13 @@ namespace OTDIPC
             }
         }
 
+        async Task WriteAsync(byte[] bytes) {
+            if (_server == null) {
+                return;
+            }
+            await _server.WriteAsync(bytes).AsTask().WaitAsync(TimeSpan.FromMilliseconds(100));
+        }
+
         void OnFailedWrite()
         {
             if (!_connected)
@@ -63,13 +74,13 @@ namespace OTDIPC
             }
             System.Diagnostics.Debug.WriteLine("Error writing to named pipe, resetting server");
             _connected = false;
-            StartServer();
+            RunServerAsync();
         }
 
         public bool HaveClient { get => _connected; }
 
         public event Action? ClientConnected;
-        async Task StartServer()
+        async Task RunServerAsync()
         {
             if (_waitingForConnection)
             {
