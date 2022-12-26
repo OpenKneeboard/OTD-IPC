@@ -82,7 +82,11 @@ namespace OTDIPC
             _server = null;
 
             System.Diagnostics.Debug.WriteLine("Starting named pipe server");
-            var server = new NamedPipeServerStream("com.fredemmott.openkneeboard.OTDIPC/v0.1", PipeDirection.Out, 1, PipeTransmissionMode.Message);
+            // Only the most recent connection will receive data, but allow multiple so that we can instantly
+            // reset in case of a hung client.
+            //
+            // If we have a hung client, we can't free the pipe until the other end has unwedged itself.
+            var server = new NamedPipeServerStream("com.fredemmott.openkneeboard.OTDIPC/v0.1", PipeDirection.Out, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Message);
             System.Diagnostics.Debug.WriteLine("Waiting for connection");
             await server.WaitForConnectionAsync();
             _server = server;
