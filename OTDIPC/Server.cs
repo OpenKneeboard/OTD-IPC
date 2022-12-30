@@ -53,6 +53,12 @@ namespace OTDIPC
             {
                 OnFailedWrite();
             }
+            catch (ObjectDisposedException) {
+                // If we think the client's hung, we can close the connection
+                // while a write is in progress; this is especially common
+                // for ping writes.
+                OnFailedWrite();
+            }
             finally
             {
                 Marshal.FreeCoTaskMem(ptr);
