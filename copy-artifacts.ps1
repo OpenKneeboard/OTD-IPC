@@ -39,7 +39,7 @@ If (!(Test-Path $Out)) {
   New-Item -ItemType Directory -Path $Out
 }
 
-$pluginVersion = "0.1.4.${BuildNumber}"
+$pluginVersion = "0.1.5.${BuildNumber}"
 Set-Content $Out/version.txt -Value $pluginVersion
 
 $metadataJson = "${Out}/metadata.json"
