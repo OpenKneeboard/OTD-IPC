@@ -21,14 +21,12 @@ namespace OTDIPC
 
         static Server _server = new();
 
-        bool _haveNewDeviceInfo = false;
-
         public OTDIPC() {
             _server.ClientConnected += () => { this.OnClientConnected(); };
         }
 
         void OnClientConnected() {
-            _haveNewDeviceInfo = true;
+            _server.SendMessage(_deviceInfo);
         }
 
         public void Consume(IDeviceReport deviceReport)
@@ -100,12 +98,6 @@ namespace OTDIPC
 
             if (!changed) {
                 return;
-            }
-
-            if (_haveNewDeviceInfo)
-            {
-                _haveNewDeviceInfo = false;
-                _server.SendMessage(_deviceInfo);
             }
 
             _server.SendMessage(_state);
