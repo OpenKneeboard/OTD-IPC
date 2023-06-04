@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2022 Fred Emmott <fred@fredemmott.com>
  *
  * SPDX-License-Identifier: ISC
@@ -20,12 +20,29 @@ namespace OTDIPC
         DeviceInfo _deviceInfo = new();
 
         static Server _server = new();
+        Action? _clientConnectedHandler;
 
-        public OTDIPC() {
-            _server.ClientConnected += () => { this.OnClientConnected(); };
+        public OTDIPC()
+        {
+            WeakReference<OTDIPC> weakThis = new(this);
+            _clientConnectedHandler = () =>
+            {
+                OTDIPC? self;
+                if (weakThis.TryGetTarget(out self))
+                {
+                    self?.OnClientConnected();
+                }
+            };
+            _server.ClientConnected += _clientConnectedHandler;
         }
 
-        void OnClientConnected() {
+        ~OTDIPC()
+        {
+            _server.ClientConnected -= _clientConnectedHandler;
+        }
+
+        void OnClientConnected()
+        {
             _server.SendMessage(_deviceInfo);
         }
 
