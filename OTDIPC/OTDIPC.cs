@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2022 Fred Emmott <fred@fredemmott.com>
  *
  * SPDX-License-Identifier: ISC
@@ -48,7 +48,8 @@ namespace OTDIPC
 
         public void Consume(IDeviceReport deviceReport)
         {
-            if (!_server.HaveClient) {
+            if (!_server.HaveClient)
+            {
                 Emit?.Invoke(deviceReport);
                 return;
             }
@@ -72,11 +73,11 @@ namespace OTDIPC
                 {
                     if (buttons[i])
                     {
-                        _state.PenButtons |= (UInt32) (1 << i);
+                        _state.PenButtons |= (UInt32)(1 << i);
                     }
                     else
                     {
-                        _state.PenButtons &= (UInt32) ~(1 << i);
+                        _state.PenButtons &= (UInt32)~(1 << i);
                     }
                 }
                 _state.PenButtonsValid = true;
@@ -98,11 +99,11 @@ namespace OTDIPC
                 {
                     if (buttons[i])
                     {
-                        _state.AuxButtons |= (UInt32) (1 << i);
+                        _state.AuxButtons |= (UInt32)(1 << i);
                     }
                     else
                     {
-                        _state.AuxButtons &= (UInt32) ~(1 << i);
+                        _state.AuxButtons &= (UInt32)~(1 << i);
                     }
                 }
                 _state.AuxButtonsValid = true;
@@ -113,7 +114,8 @@ namespace OTDIPC
                 return;
             }
 
-            if (!changed) {
+            if (!changed)
+            {
                 return;
             }
 
@@ -141,9 +143,10 @@ namespace OTDIPC
                 _deviceInfo.IsValid = true;
 
                 var id = _tablet.Identifiers.First();
-                if (id != null) {
-                    _deviceInfo.Header.VID = (UInt16) id.VendorID;
-                    _deviceInfo.Header.PID = (UInt16) id.ProductID;
+                if (id != null)
+                {
+                    _deviceInfo.Header.VID = (UInt16)id.VendorID;
+                    _deviceInfo.Header.PID = (UInt16)id.ProductID;
                 }
 
                 _state = new();
