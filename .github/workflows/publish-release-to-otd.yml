@@ -1,0 +1,52 @@
+name: Publish Release to OTD Plugins-Repository
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+jobs:
+  publish-to-otd:
+    name: Publish to OTD Plugins-Repository
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout ${{github.repository}}
+        with:
+          path: source
+          fetch-depth: 0
+          ref: master
+      - uses: actions/checkout@v3
+        name: Checkout OpenTabletDriver/Plugins-Repository
+        with:
+          repository: OpenTabletDriver/Plugins-Repository
+          path: plugins
+          fetch-depth: 0
+          ref: master
+      - name: Run update script
+        id: UpdateScript
+        shell: pwsh
+        working-directory: source/autoupdate
+        run: |
+          .\source\update-release-metadata.ps1 `
+            -GitHubToken ${{github.token}} `
+            -PluginRepositoryPath (Get-Item plugins).FullName
+          cd plugins
+          git diff --exit-code | Out-Null
+          if ($LastExitCode -eq 0) {
+            $HaveChanges="false"
+          } else {
+            $HaveChanges="true"
+          }
+          Add-Content $Env:GITHUB_OUTPUT "HAVE_CHANGES=${HaveChanges}"
+          Exit 0
+      - name: Create pull request
+        if: ${{ steps.UpdateScript.outputs.HAVE_CHANGES }}
+        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38
+        with:
+          path: plugins
+          author: "OpenKneeboard Bot <openkneeboard-bot@users.noreply.github.com>"
+          branch: "update-OTDIPC"
+          delete-branch: true
+          push-to-fork: openkneeboard-bot/OTD-Plugin-Repository
+          token: ${{ secrets.OPENKNEEBOARD_BOT_PAT }}
+          title: "Update OTD-IPC plugin"
+          commit-message: "Update OTD-IPC plugin"

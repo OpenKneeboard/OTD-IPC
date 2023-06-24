@@ -16,7 +16,7 @@
 
   In A GitHub Actions workflow:
 
-  ./update-release-metadata.ps1 -GitHubToken ${{GITHUB_TOKEN}} -PluginRepositoryPath ..\Plugin-Repository
+  ./update-release-metadata.ps1 -GitHubToken ${{github.token}} -PluginRepositoryPath ..\Plugin-Repository
 
 #>
 
