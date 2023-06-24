@@ -1,11 +1,11 @@
-name: Publish Release to OTD Plugins-Repository
+name: Publish Release to OTD Plugin-Repository
 on:
   release:
     types: [published]
   workflow_dispatch:
 jobs:
   publish-to-otd:
-    name: Publish to OTD Plugins-Repository
+    name: Publish to OTD Plugin-Repository
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v3
@@ -15,9 +15,9 @@ jobs:
           fetch-depth: 0
           ref: master
       - uses: actions/checkout@v3
-        name: Checkout OpenTabletDriver/Plugins-Repository
+        name: Checkout OpenTabletDriver/Plugin-Repository
         with:
-          repository: OpenTabletDriver/Plugins-Repository
+          repository: OpenTabletDriver/Plugin-Repository
           path: plugins
           fetch-depth: 0
           ref: master
