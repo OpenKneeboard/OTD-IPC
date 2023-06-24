@@ -24,7 +24,6 @@ jobs:
       - name: Run update script
         id: UpdateScript
         shell: pwsh
-        working-directory: source/autoupdate
         run: |
           .\source\update-release-metadata.ps1 `
             -GitHubToken ${{github.token}} `
