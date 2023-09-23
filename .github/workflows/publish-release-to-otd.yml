@@ -8,13 +8,13 @@ jobs:
     name: Publish to OTD Plugin-Repository
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: Checkout ${{github.repository}}
         with:
           path: source
           fetch-depth: 0
           ref: master
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: Checkout OpenTabletDriver/Plugin-Repository
         with:
           repository: OpenTabletDriver/Plugin-Repository
