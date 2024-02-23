@@ -28,19 +28,19 @@ jobs:
           Add-Content $Env:GITHUB_OUTPUT "version=$(Get-Content $out/version.txt)"
       - name: Attach zip
         if: matrix.config != 'Debug'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: OpenKneeboard-OTD-IPC-v${{steps.build.outputs.version}}
           path: ${{steps.build.outputs.path}}/OpenKneeboard-OTD-IPC.zip
       - name: Attach test client
         if: matrix.config != 'Debug'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: OpenKneeboard-OTD-IPC-TestClient-v${{steps.build.outputs.version}}
           path: ${{steps.build.outputs.path}}/OTDIPC-TestClient.exe
       - name: Attach debug symbols
         if: matrix.config != 'Debug'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: OpenKneeboard-OTD-IPC-DebugSymbols-v${{steps.build.outputs.version}}
           path: ${{steps.build.outputs.path}}/*.pdb
