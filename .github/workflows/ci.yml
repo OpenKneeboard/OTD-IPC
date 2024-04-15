@@ -12,7 +12,7 @@ jobs:
       - name: Fetch nuget packages
         run: dotnet restore
       - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.3
+        uses: microsoft/setup-msbuild@v2
         with:
           vs-version: '[17.2,)'
       - name: Build
