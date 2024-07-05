@@ -38,3 +38,5 @@ Finally, close the plugin manager window.
 Repeat these steps for each tablet that you want to use with OpenKneeboard.
 
 When OpenKneeboard (or another application using OTD-IPC) is active, everything you do with the tablet will be sent to OpenKneeboard instead of your usual OpenTabletDriver output and bindings.
+
+OpenTabletDriver is only active while OpenTabletDriver is running; if you close OpenTabletDriver, your tablet will not work in game or in the OpenKneeboard window.
