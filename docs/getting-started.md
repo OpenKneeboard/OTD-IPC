@@ -7,7 +7,9 @@ First, remove any other tablet drivers; this includes any drivers from:
 - Huion
 - VRKneeboard
 
-Then, [install OpenTabletDriver](https://opentabletdriver.net/Wiki/Install/Windows), and configure your tablet however you want it outside of OpenKneeboard.
+[TabletDriverCleanup](https://github.com/X9VoiD/TabletDriverCleanup) is a useful tool to make sure previous drivers have been completely removed.
+
+Once you have removed other tablet drivers, [install OpenTabletDriver](https://opentabletdriver.net/Wiki/Install/Windows), and configure your tablet however you want it outside of OpenKneeboard.
 
 ## Installing OpenKneeboard OTD-IPC
 
