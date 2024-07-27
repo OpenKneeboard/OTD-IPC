@@ -33,10 +33,10 @@ Finally, close the plugin manager window.
 2. Switch to the filters tab
 3. Select OpenKneeboard
 4. Tick the 'Enable OpenKneeboard (OTD-IPC)' box
-5. Click 'Apply' to apply your changes; click 'Save' too to automatically enable OTD-IPC when OpenTabletDriver starts.
+5. Click both 'Save' *AND* 'Apply'; if you do not click 'Save', OpenTabletDriver will not load OTD-IPC when it next starts
 
 Repeat these steps for each tablet that you want to use with OpenKneeboard.
 
 When OpenKneeboard (or another application using OTD-IPC) is active, everything you do with the tablet will be sent to OpenKneeboard instead of your usual OpenTabletDriver output and bindings.
 
-OpenTabletDriver is only active while OpenTabletDriver is running; if you close OpenTabletDriver, your tablet will not work in game or in the OpenKneeboard window.
+OpenTabletDriver is only active while OpenTabletDriver is running; if you close OpenTabletDriver, your tablet will not work in game or in the OpenKneeboard window. You might want OpenTabletDriver [to automatically start](https://opentabletdriver.net/Wiki/FAQ/Windows#startup).
