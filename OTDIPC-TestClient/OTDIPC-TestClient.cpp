@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2022 Fred Emmott <fred@fredemmott.com>
  *
- * SPDX-License-Identifier: ISC
+ * SPDX-License-Identifier: MIT
  */
 
 #define WIN32_LEAN_AND_MEAN 1
