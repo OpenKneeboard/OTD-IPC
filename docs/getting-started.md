@@ -1,5 +1,9 @@
 # Getting Started
 
+## Bluetooth users
+
+OpenTabletDriver does not support bluetooth, so if you are using a bluetooth tablet, you must connect it via USB. Even if it shows up in the list in OpenTabletDriver, it will not work correctly. This can not be changed by OTD-IPC or OpenKneeboard.
+
 ## Installing OpenTabletDriver
 
 First, remove any other tablet drivers; this includes any drivers from:
