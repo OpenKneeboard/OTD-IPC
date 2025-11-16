@@ -10,16 +10,15 @@
 #include <string_view>
 
 namespace OTDIPC::Messages {
-
-	struct DebugMessage : Header {
+	struct DebugMessage {
 		static constexpr MessageType MESSAGE_TYPE = MessageType::DebugMessage;
 
+		Header header { .messageType = MESSAGE_TYPE };
 		char first {};
-		
+
 		std::string_view message() const
 		{
-			return { &first, size - offsetof(DebugMessage, first) };
+			return { &first, header.size - offsetof(DebugMessage, first) };
 		}
 	};
-
 }

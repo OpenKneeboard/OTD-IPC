@@ -15,8 +15,6 @@
 #include <OTD-IPC/State.h>
 #include <OTD-IPC/DebugMessage.h>
 
-#include "WindowsPipeClient.h"
-
 void DumpMessage(const OTDIPC::Messages::DeviceInfo* const info)
 {
     if (!info->isValid)
@@ -94,7 +92,7 @@ void DumpMessage(const OTDIPC::Messages::DebugMessage* const msg)
     std::println("{}", msg->message());
 }
 
-template <std::derived_from<OTDIPC::Messages::Header> T>
+template <class T>
 void DumpMessage(const OTDIPC::Messages::Header* const header)
 {
     if (header->size < sizeof(T))
@@ -125,8 +123,8 @@ int main()
     static_assert(sizeof(buffer) >= sizeof(State));
     const auto header = reinterpret_cast<const Header* const>(buffer);
 
-    while (const auto result = (*connection)->Read(buffer, sizeof(Header)))
-    {
+    while (true) {
+        const auto result = (*connection)->Read(buffer, sizeof(Header));
         if (!result)
         {
             std::cerr << result.error() << std::endl;
@@ -173,6 +171,4 @@ int main()
             break;
         }
     }
-    std::cerr << std::format("Read failed: {}", GetLastError()) << std::endl;
-    return 0;
 }
