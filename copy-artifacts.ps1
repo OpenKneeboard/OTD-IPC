@@ -64,7 +64,7 @@ Copy-Item $Platform/$Configuration/*.pdb $Out
 Copy-Item $Platform/$Configuration/*.exe $Out
 
 $compress = @{
-  Path = (Get-ChildItem -Path $Out -Filter '*.pdb')
+  Path = (Get-ChildItem -Path $Out -Filter '*.pdb').FullName
   DestinationPath = "${Out}/DebugSymbols.zip"
   Force = $True
 }
