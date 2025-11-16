@@ -14,11 +14,11 @@ namespace OTDIPC::Messages {
 	struct DebugMessage : Header {
 		static constexpr MessageType MESSAGE_TYPE = MessageType::DebugMessage;
 
-		wchar_t first {};
+		char first {};
 		
-		std::wstring_view message() const
+		std::string_view message() const
 		{
-			return { &first, (size - offsetof(DebugMessage, first)) / sizeof(wchar_t) };
+			return { &first, size - offsetof(DebugMessage, first) };
 		}
 	};
 

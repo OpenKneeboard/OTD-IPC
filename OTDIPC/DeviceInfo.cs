@@ -31,33 +31,35 @@ namespace OTDIPC
         {
             get
             {
-                fixed (char* p = _Name)
+                fixed (byte* p = _Name)
                 {
                     var len = 0;
-                    while (len < 64 && p[len] != '\0')
+                    while (len < 64 && p[len] != 0)
                     {
                         ++len;
                     }
-                    return new string(p, 0, len);
+
+                    return Encoding.UTF8.GetString(p, len);
                 }
             }
 
             set
             {
+                var bytes = Encoding.UTF8.GetBytes(value);
                 for (var i = 0; i < 64; ++i)
                 {
-                    if (i < value.Length)
+                    if (i < bytes.Length)
                     {
-                        _Name[i] = value[i];
+                        _Name[i] = bytes[i];
                     }
                     else
                     {
-                        _Name[i] = '\0';
+                        _Name[i] = 0;
                     }
                 }
             }
         }
 
-        private fixed char _Name[64];
+        private fixed byte _Name[64];
     }
 }

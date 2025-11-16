@@ -16,7 +16,7 @@ namespace OTDIPC::Messages {
 		float maxX;
 		float maxY;
 		uint32_t maxPressure;
-		wchar_t name[64];
+		char name[64];
 	};
 
 }

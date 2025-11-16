@@ -30,7 +30,7 @@ namespace OTDIPC
 
         public void SendDebugMessage(string message)
         {
-            var bytes = Encoding.Unicode.GetBytes(message);
+            var bytes = Encoding.UTF8.GetBytes(message);
             Header header = new()
             {
                 MessageType = MessageType.DebugMessage,

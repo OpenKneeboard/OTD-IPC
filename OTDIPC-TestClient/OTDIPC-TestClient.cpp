@@ -29,11 +29,11 @@ void DumpMessage(const OTDIPC::Messages::DeviceInfo* const info)
         return;
     }
 
-    std::wcout << std::format(
-        L"Device: {}\n  "
-        L"  VID {:04x} PID {:04x}\n"
-        L"  {}x{}\n"
-        L"  max pressure: {}",
+    std::cout << std::format(
+        "Device: {}\n  "
+        "  VID {:04x} PID {:04x}\n"
+        "  {}x{}\n"
+        "  max pressure: {}",
         info->name,
         info->vid,
         info->pid,
@@ -87,7 +87,7 @@ void DumpMessage(const OTDIPC::Messages::Ping* const msg) {
 
 void DumpMessage(const OTDIPC::Messages::DebugMessage* const msg)
 {
-    std::wcout << msg->message() << std::endl;
+    std::cout << msg->message() << std::endl;
 }
 
 template <std::derived_from<OTDIPC::Messages::Header> T>
