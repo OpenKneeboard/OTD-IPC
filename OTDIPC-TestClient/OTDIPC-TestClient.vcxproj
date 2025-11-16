@@ -139,7 +139,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="OTDIPC-TestClient.cpp" />
-    <ClCompile Include="WindowsPipeClient.cpp" />
+    <ClCompile Include="WindowsTransport.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="../include/OTD-IPC/DeviceInfo.h" />
@@ -147,8 +147,8 @@
     <ClInclude Include="../include/OTD-IPC/MessageType.h" />
     <ClInclude Include="../include/OTD-IPC/State.h" />
     <ClInclude Include="..\include\OTD-IPC\DebugMessage.h" />
-    <ClInclude Include="PipeClient.h" />
-    <ClInclude Include="WindowsPipeClient.h" />
+    <ClInclude Include="Transport.h" />
+    <ClInclude Include="WindowsTransport.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

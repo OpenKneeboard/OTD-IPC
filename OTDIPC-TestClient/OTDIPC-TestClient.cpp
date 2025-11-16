@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "PipeClient.h"
+#include "Transport.h"
 
 #include <iostream>
 #include <format>
@@ -110,7 +110,7 @@ void DumpMessage(const OTDIPC::Messages::Header* const header)
 int main()
 {
     std::setvbuf(stdout, nullptr, _IONBF, 0);
-    const auto connection = PipeClient::Open();
+    const auto connection = Transport::Open();
     if (!connection)
     {
         std::cerr << connection.error() << std::endl;

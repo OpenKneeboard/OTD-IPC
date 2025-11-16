@@ -6,12 +6,12 @@
 #include <string>
 #include <memory>
 
-class PipeClient
+class Transport
 {
 public:
-    static std::expected<std::unique_ptr<PipeClient>, std::string> Open() noexcept;
+    static std::expected<std::unique_ptr<Transport>, std::string> Open() noexcept;
     
-    virtual ~PipeClient() = default;
+    virtual ~Transport() = default;
     
     virtual std::expected<size_t, std::string> Read(void* buffer, size_t bufferSize) noexcept = 0;
 };

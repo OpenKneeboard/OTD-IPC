@@ -7,7 +7,7 @@ using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Tablet;
-using System.IO.Pipes;
+using System.Net.Sockets;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -19,10 +19,12 @@ namespace OTDIPC
     public class Server
     {
         Ping _Ping = new();
-        NamedPipeServerStream? _server;
+        Socket? _connection;
+        Socket? _listener;
         Timer? _timer;
         bool _waitingForConnection;
         bool _connected;
+        private readonly string _socketPath = GetSocketPath();
 
         public Server() {
             _timer = new ((_) => { this.Ping(); }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
@@ -42,7 +44,7 @@ namespace OTDIPC
 
         public void SendMessage<T>(T message) where T : unmanaged 
         {
-            if (_server == null)
+            if (_connection == null)
             {
                 RunServerAsync();
                 return;
@@ -63,6 +65,10 @@ namespace OTDIPC
             {
                 OnFailedWrite();
             }
+            catch (SocketException)
+            {
+                OnFailedWrite();
+            }
             catch (ObjectDisposedException) {
                 // If we think the client's hung, we can close the connection
                 // while a write is in progress; this is especially common
@@ -76,11 +82,21 @@ namespace OTDIPC
         }
 
         void WriteBytes(ReadOnlySpan<byte> bytes) {
-            if (_server == null) {
+            if (_connection == null) {
                 return;
             }
 
-            _server.Write(bytes);
+            // Send may not send all bytes in one call; loop until done
+            int totalSent = 0;
+            while (totalSent < bytes.Length)
+            {
+                int sent = _connection.Send(bytes[totalSent..]);
+                if (sent <= 0)
+                {
+                    throw new SocketException();
+                }
+                totalSent += sent;
+            }
         }
 
         void OnFailedWrite()
@@ -89,8 +105,10 @@ namespace OTDIPC
             {
                 return;
             }
-            System.Diagnostics.Debug.WriteLine("Error writing to named pipe, resetting server");
+            System.Diagnostics.Debug.WriteLine("Error writing to unix domain socket, resetting server");
             _connected = false;
+            try { _connection?.Dispose(); } catch { }
+            _connection = null;
             RunServerAsync();
         }
 
@@ -106,19 +124,37 @@ namespace OTDIPC
 
             _waitingForConnection = true;
 
-            _server?.Close();
-            _server = null;
+            try { _connection?.Dispose(); } catch { }
+            _connection = null;
+            try { _listener?.Dispose(); } catch { }
+            _listener = null;
 
-            System.Diagnostics.Debug.WriteLine("Starting named pipe server");
-            // Only the most recent connection will receive data, but allow multiple so that we can instantly
-            // reset in case of a hung client.
-            //
-            // If we have a hung client, we can't free the pipe until the other end has unwedged itself.
-            var server = new NamedPipeServerStream("com.fredemmott.openkneeboard.OTDIPC/v2", PipeDirection.Out, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte);
-            System.Diagnostics.Debug.WriteLine("Waiting for connection");
-            await server.WaitForConnectionAsync();
-            System.Diagnostics.Debug.WriteLine("Client connected");
-            _server = server;
+            Log.Write("otd-ipc", "Starting unix domain socket server at " + _socketPath);
+            try
+            {
+                // On Unix, ensure any previous socket file is removed
+                if (System.IO.File.Exists(_socketPath))
+                {
+                    System.IO.File.Delete(_socketPath);
+                }
+                
+                var directory = Path.GetDirectoryName(_socketPath)!;
+                if (!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+            }
+            catch { }
+
+            var listener = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
+            listener.Bind(new UnixDomainSocketEndPoint(_socketPath));
+            listener.Listen(1);
+            _listener = listener;
+
+            Log.Write("otd-ipc", "Waiting for connection");
+            var client = await listener.AcceptAsync();
+            Log.Write("otd-ipc", "Client connected");
+            _connection = client;
             _waitingForConnection = false;
             _connected = true;
 
@@ -134,6 +170,12 @@ namespace OTDIPC
             SendMessage(_Ping);
         }
 
+        static string GetSocketPath()
+        {
+            var prefix = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var path = Path.Join(prefix, "otd-ipc", "sock");
+            return path;
+        }
 
     }
 
