@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 namespace OTDIPC
 {
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
-    struct Header {
+    unsafe struct Header {
         public MessageType MessageType;
         public UInt32 Size;
         public UInt16 VID;

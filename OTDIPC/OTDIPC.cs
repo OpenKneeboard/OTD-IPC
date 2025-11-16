@@ -3,13 +3,11 @@
  *
  * SPDX-License-Identifier: MIT
  */
-using OpenTabletDriver.Plugin;
+
+using System.Reflection;
 using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Tablet;
-using System.IO.Pipes;
-using System.Numerics;
-using System.Runtime.InteropServices;
 
 namespace OTDIPC
 {
@@ -18,6 +16,7 @@ namespace OTDIPC
     {
         State _state = new();
         DeviceInfo _deviceInfo = new();
+        private readonly string _implementationIdDebugMessage = GenerateImplementationIdDebugMessage();
 
         static Server _server = new();
         Action? _clientConnectedHandler;
@@ -43,6 +42,9 @@ namespace OTDIPC
 
         void OnClientConnected()
         {
+            System.Diagnostics.Debug.WriteLine("Sending hello");
+            _server.SendDebugMessage(_implementationIdDebugMessage);
+            System.Diagnostics.Debug.WriteLine("Sending device info");
             _server.SendMessage(_deviceInfo);
         }
 
@@ -156,6 +158,14 @@ namespace OTDIPC
                 _server.SendMessage(_deviceInfo);
             }
         }
-    }
 
+        private static string GenerateImplementationIdDebugMessage()
+        {
+            var self = Assembly.GetExecutingAssembly().GetName();
+            var otd = Assembly.GetEntryAssembly()?.GetName();
+            return $"OTD-IPC: `{self.Name}` v{self.Version} running on `{otd?.Name}` v{otd?.Version}";
+        }
+
+    }
+    
 }

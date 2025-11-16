@@ -12,5 +12,6 @@ namespace OTDIPC
         DeviceInfo = 1,
         State = 2,
         Ping = 3,
+        DebugMessage = 4,
     }
 }

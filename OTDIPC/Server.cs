@@ -11,6 +11,7 @@ using System.IO.Pipes;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace OTDIPC
 {
@@ -27,7 +28,19 @@ namespace OTDIPC
             _timer = new ((_) => { this.Ping(); }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         }
 
-        public void SendMessage<T>(T message) where T : struct
+        public void SendDebugMessage(string message)
+        {
+            var bytes = Encoding.Unicode.GetBytes(message);
+            Header header = new()
+            {
+                MessageType = MessageType.DebugMessage,
+                Size = (UInt32)(Marshal.SizeOf<Header>() + bytes.Length),
+            };
+            SendMessage(header);
+            WriteBytes(bytes);
+        }
+
+        public void SendMessage<T>(T message) where T : unmanaged 
         {
             if (_server == null)
             {
