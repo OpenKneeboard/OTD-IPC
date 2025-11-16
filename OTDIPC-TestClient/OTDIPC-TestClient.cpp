@@ -105,24 +105,47 @@ int main()
       nullptr,
       OPEN_EXISTING,
       0,
-      NULL)};
+      nullptr)};
   if (!connection) {
-    std::cerr << std::format("Failed to open pipe: {}", GetLastError()) << std::endl;
+    std::cerr << std::format("Failed to open pipe: `{}` -> {}", OTDIPC::NamedPipePathA, GetLastError()) << std::endl;
     return 1;
   }
+  std::cerr << "Opened pipe" << OTDIPC::NamedPipePathA << std::endl;
   char buffer[1024];
 
   using namespace OTDIPC::Messages;
   static_assert(sizeof(buffer) >= sizeof(DeviceInfo));
   static_assert(sizeof(buffer) >= sizeof(State));
-  auto header = reinterpret_cast<const Header* const>(buffer);
+  const auto header = reinterpret_cast<const Header* const>(buffer);
 
   DWORD bytesRead {};
-  while (ReadFile(connection.get(), buffer, sizeof(buffer), &bytesRead, nullptr)) {
-    if (bytesRead != header->size) {
-      std::cerr << "header->size != packet size - is named pipe in message mode?" << std::endl;
+  while (ReadFile(connection.get(), buffer, sizeof(Header), &bytesRead, nullptr)) {
+    if (bytesRead != sizeof(Header))
+    {
+      std::cerr << "bytesRead != sizeof(Header)" << std::endl;
       return 1;
     }
+    if (header->size < sizeof(Header)) {
+      std::cerr << std::format("header->size ({}) < sizeof(Header) ({})", header->size, sizeof(Header)) << std::endl;
+      return 1;
+    }
+    if (header->size > sizeof(buffer))
+    {
+      std::cerr << std::format("header->size ({}) < sizeof(Buffer) ({})", header->size, sizeof(buffer)) << std::endl;
+      return 1;
+    }
+    const auto bytesToRead= header->size - sizeof(Header);
+    if (!ReadFile(connection.get(), buffer + sizeof(Header), bytesToRead, &bytesRead, nullptr))
+    {
+      std::cerr << std::format("Failed to read after header: {}", GetLastError()) << std::endl;
+      return 1;
+    }
+    if (bytesRead != bytesToRead)
+    {
+      std::cerr << std::format("Only read {} bytes after header, needed {}", bytesRead, bytesToRead) << std::endl;
+      return 1;
+    }
+    
     switch (header->messageType) {
       case MessageType::DeviceInfo:
         DumpMessage<DeviceInfo>(header);

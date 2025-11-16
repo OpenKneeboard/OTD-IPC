@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 
 namespace OTDIPC
 {
-    [PluginName("OpenKneeboard (OTD-IPC)"), SupportedPlatformAttribute(PluginPlatform.Windows)]
+    [PluginName("OpenKneeboard (OTD-IPC)")]
     public class OTDIPC : IPositionedPipelineElement<IDeviceReport>
     {
         State _state = new();

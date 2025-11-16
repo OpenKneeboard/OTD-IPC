@@ -9,11 +9,12 @@ using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Tablet;
 using System.IO.Pipes;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace OTDIPC
 {
-    [PluginName("OpenKneeboard (OTD-IPC)"), SupportedPlatformAttribute(PluginPlatform.Windows)]
+    [PluginName("OpenKneeboard (OTD-IPC)")]
     public class Server
     {
         Ping _Ping = new();
@@ -37,13 +38,9 @@ namespace OTDIPC
             IntPtr ptr = IntPtr.Zero;
             try
             {
-                var size = Marshal.SizeOf(typeof(T));
-                byte[] bytes = new byte[size];
-
-                ptr = Marshal.AllocCoTaskMem(size);
-                Marshal.StructureToPtr(message, ptr, false);
-                Marshal.Copy(ptr, bytes, 0, size);
-                WriteAsync(bytes).GetAwaiter().GetResult();
+                Span<byte> bytes = stackalloc byte[Unsafe.SizeOf<T>()];
+                MemoryMarshal.Write(bytes, ref message);
+                WriteBytes(bytes);
             }
             catch (TimeoutException)
             {
@@ -65,11 +62,12 @@ namespace OTDIPC
             }
         }
 
-        async Task WriteAsync(byte[] bytes) {
+        void WriteBytes(ReadOnlySpan<byte> bytes) {
             if (_server == null) {
                 return;
             }
-            await _server.WriteAsync(bytes).AsTask().WaitAsync(TimeSpan.FromMilliseconds(100));
+
+            _server.Write(bytes);
         }
 
         void OnFailedWrite()
@@ -103,9 +101,10 @@ namespace OTDIPC
             // reset in case of a hung client.
             //
             // If we have a hung client, we can't free the pipe until the other end has unwedged itself.
-            var server = new NamedPipeServerStream("com.fredemmott.openkneeboard.OTDIPC/v0.1", PipeDirection.Out, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Message);
+            var server = new NamedPipeServerStream("com.fredemmott.openkneeboard.OTDIPC/v2", PipeDirection.Out, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte);
             System.Diagnostics.Debug.WriteLine("Waiting for connection");
             await server.WaitForConnectionAsync();
+            System.Diagnostics.Debug.WriteLine("Client connected");
             _server = server;
             _waitingForConnection = false;
             _connected = true;
