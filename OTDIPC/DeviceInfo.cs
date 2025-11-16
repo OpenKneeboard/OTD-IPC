@@ -9,7 +9,7 @@ using System.Text;
 
 namespace OTDIPC
 {
-    [StructLayout(LayoutKind.Sequential, Pack = 0, CharSet = CharSet.Unicode)]
+    [StructLayout(LayoutKind.Sequential, Pack = 0)]
     unsafe struct DeviceInfo
     {
         public DeviceInfo()
@@ -26,15 +26,23 @@ namespace OTDIPC
         public float MaxX = 0;
         public float MaxY = 0;
         public UInt32 MaxPressure = 0;
-
-        public string Name
+        public UInt16 VendorId = 0; // Deprecated: use PersistentId instead. Used to allow matching with other data sources
+        public UInt16 ProductId = 0; // Deprecated: use PersistentId instead. Used to allow matching with other data sources
+        
+        private const int PersistentIdMaxLength = 256;
+        private fixed byte _PersistentId[PersistentIdMaxLength];
+        
+        private const int NameMaxLength = 256;
+        private fixed byte _Name[NameMaxLength];
+        
+        public string PersistentId
         {
             get
             {
-                fixed (byte* p = _Name)
+                fixed (byte* p = _PersistentId)
                 {
                     var len = 0;
-                    while (len < 64 && p[len] != 0)
+                    while (len < PersistentIdMaxLength && p[len] != 0)
                     {
                         ++len;
                     }
@@ -46,7 +54,41 @@ namespace OTDIPC
             set
             {
                 var bytes = Encoding.UTF8.GetBytes(value);
-                for (var i = 0; i < 64; ++i)
+                for (var i = 0; i < PersistentIdMaxLength; ++i)
+                {
+                    if (i < bytes.Length)
+                    {
+                        _PersistentId[i] = bytes[i];
+                    }
+                    else
+                    {
+                        _PersistentId[i] = 0;
+                    }
+                }
+            }
+        }
+
+
+        public string Name
+        {
+            get
+            {
+                fixed (byte* p = _Name)
+                {
+                    var len = 0;
+                    while (len < NameMaxLength && p[len] != 0)
+                    {
+                        ++len;
+                    }
+
+                    return Encoding.UTF8.GetString(p, len);
+                }
+            }
+
+            set
+            {
+                var bytes = Encoding.UTF8.GetBytes(value);
+                for (var i = 0; i < NameMaxLength; ++i)
                 {
                     if (i < bytes.Length)
                     {
@@ -59,7 +101,5 @@ namespace OTDIPC
                 }
             }
         }
-
-        private fixed byte _Name[64];
     }
 }

@@ -17,6 +17,7 @@ namespace OTDIPC
         State _state = new();
         DeviceInfo _deviceInfo = new();
         private readonly string _implementationIdDebugMessage = GenerateImplementationIdDebugMessage();
+        private static UInt32 _nextNonPersistentTabletId = 1;
 
         static Server _server = new();
         Action? _clientConnectedHandler;
@@ -147,13 +148,16 @@ namespace OTDIPC
                 var id = _tablet.Identifiers.First();
                 if (id != null)
                 {
-                    _deviceInfo.Header.VID = (UInt16)id.VendorID;
-                    _deviceInfo.Header.PID = (UInt16)id.ProductID;
+                    _deviceInfo.VendorId = (UInt16)id.VendorID;
+                    _deviceInfo.ProductId = (UInt16)id.ProductID;
+                    _deviceInfo.PersistentId =
+                        $"otd-ipc.openkneeboard.com/vid-pid/{_deviceInfo.VendorId:X4}-{_deviceInfo.ProductId:X4}";
                 }
+                
+                _deviceInfo.Header.NonPersistentTabletId = _nextNonPersistentTabletId++;
 
                 _state = new();
-                _state.Header.VID = _deviceInfo.Header.VID;
-                _state.Header.PID = _deviceInfo.Header.PID;
+                _state.Header.NonPersistentTabletId = _deviceInfo.Header.NonPersistentTabletId;
 
                 _server.SendMessage(_deviceInfo);
             }

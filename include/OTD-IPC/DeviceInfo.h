@@ -11,12 +11,18 @@ namespace OTDIPC::Messages {
 
 	struct DeviceInfo : Header {
 		static constexpr MessageType MESSAGE_TYPE = MessageType::DeviceInfo;
+		static constexpr std::size_t PersistentIdMaxLength = 256;
+		static constexpr std::size_t NameMaxLength = 256;
 
-		bool isValid;
-		float maxX;
-		float maxY;
-		uint32_t maxPressure;
-		char name[64];
+		bool isValid {};
+		float maxX {};
+		float maxY {};
+		uint32_t maxPressure {};
+		uint16_t vendorId {}; // Deprecated: use persistentId instead. Used to allow matching with other data sources
+		uint16_t productId {}; // Deprecated: use persistentId instead. Used to allow matching with other data sources
+		
+		char persistentId[PersistentIdMaxLength] {};
+		char name[NameMaxLength] {};
 	};
 
 }

@@ -30,13 +30,16 @@ void DumpMessage(const OTDIPC::Messages::DeviceInfo* const info)
     }
 
     std::cout << std::format(
-        "Device: {}\n  "
+        "Device {:04x}: {}\n"
+        "  Persistent ID: {}\n"
         "  VID {:04x} PID {:04x}\n"
         "  {}x{}\n"
         "  max pressure: {}",
+        info->nonPersistentTabletId,
         info->name,
-        info->vid,
-        info->pid,
+        info->persistentId,
+        info->vendorId,
+        info->productId,
         info->maxX,
         info->maxY,
         info->maxPressure) << std::endl;
@@ -63,11 +66,10 @@ void DumpMessage(const OTDIPC::Messages::State* const state) {
     }
 
     std::cout << std::format(
-        "{:04x}-{:04x} -> ({}, {}, {}) {} (near: {})\n"
+        "{:04x} -> ({}, {}, {}) {} (near: {})\n"
         "  Pen: {}\n"
         "  Aux: {}",
-        state->vid,
-        state->pid,
+        state->nonPersistentTabletId,
         state->x,
         state->y,
         state->hoverDistance,
@@ -79,9 +81,8 @@ void DumpMessage(const OTDIPC::Messages::State* const state) {
 
 void DumpMessage(const OTDIPC::Messages::Ping* const msg) {
     std::cout << std::format(
-        "{:04x}-{:04x} Ping {:#016x}",
-        msg->vid,
-        msg->pid,
+        "{:08x} Ping {:#016x}",
+        msg->nonPersistentTabletId,
         msg->sequenceNumber) << std::endl;
 }
 
