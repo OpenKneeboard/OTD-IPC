@@ -4,32 +4,28 @@
  * SPDX-License-Identifier: MIT
  */
 
-#define WIN32_LEAN_AND_MEAN 1
-#define NOMINMAX 1
-#define UNICODE 1
-#define _UNICODE 1
+#include "PipeClient.h"
 
 #include <iostream>
 #include <format>
-#include <Windows.h>
-#include <Unknwn.h>
-#include <winrt/base.h>
+#include <print>
 
 #include <OTD-IPC/DeviceInfo.h>
 #include <OTD-IPC/Ping.h>
-#include <OTD-IPC/NamedPipePath.h>
 #include <OTD-IPC/State.h>
 #include <OTD-IPC/DebugMessage.h>
+
+#include "WindowsPipeClient.h"
 
 void DumpMessage(const OTDIPC::Messages::DeviceInfo* const info)
 {
     if (!info->isValid)
     {
-        std::cout << "Received invalid deviceInfo packet" << std::endl;
+        std::println("Received invalid deviceInfo");
         return;
     }
 
-    std::cout << std::format(
+    std::println(
         "Device {:04x}: {}\n"
         "  Persistent ID: {}\n"
         "  VID {:04x} PID {:04x}\n"
@@ -42,30 +38,36 @@ void DumpMessage(const OTDIPC::Messages::DeviceInfo* const info)
         info->productId,
         info->maxX,
         info->maxY,
-        info->maxPressure) << std::endl;
+        info->maxPressure);
 }
 
-void DumpMessage(const OTDIPC::Messages::State* const state) {
+void DumpMessage(const OTDIPC::Messages::State* const state)
+{
     std::string penButtons;
     std::string auxButtons;
 
-  for (int i = 0; i < 32; ++i) {
-    if (state->penButtons & (1 << i)) {
-      if (!penButtons.empty()) {
+    for (int i = 0; i < 32; ++i)
+    {
+        if (state->penButtons & (1 << i))
+        {
+            if (!penButtons.empty())
+            {
                 penButtons += " ";
             }
             penButtons += std::to_string(i);
         }
 
-    if (state->auxButtons & (1 << i)) {
-      if (!auxButtons.empty()) {
+        if (state->auxButtons & (1 << i))
+        {
+            if (!auxButtons.empty())
+            {
                 auxButtons += " ";
             }
             auxButtons += std::to_string(i);
         }
     }
 
-    std::cout << std::format(
+    std::println(
         "{:04x} -> ({}, {}, {}) {} (near: {})\n"
         "  Pen: {}\n"
         "  Aux: {}",
@@ -76,19 +78,20 @@ void DumpMessage(const OTDIPC::Messages::State* const state) {
         state->pressure,
         state->nearProximity,
         penButtons,
-        auxButtons) << std::endl;
+        auxButtons);
 }
 
-void DumpMessage(const OTDIPC::Messages::Ping* const msg) {
-    std::cout << std::format(
+void DumpMessage(const OTDIPC::Messages::Ping* const msg)
+{
+    std::println(
         "{:08x} Ping {:#016x}",
         msg->nonPersistentTabletId,
-        msg->sequenceNumber) << std::endl;
+        msg->sequenceNumber);
 }
 
 void DumpMessage(const OTDIPC::Messages::DebugMessage* const msg)
 {
-    std::cout << msg->message() << std::endl;
+    std::println("{}", msg->message());
 }
 
 template <std::derived_from<OTDIPC::Messages::Header> T>
@@ -108,23 +111,13 @@ void DumpMessage(const OTDIPC::Messages::Header* const header)
 
 int main()
 {
-    winrt::file_handle connection{
-        CreateFileW(
-            OTDIPC::NamedPipePathW,
-            GENERIC_READ,
-            0,
-            nullptr,
-            OPEN_EXISTING,
-            0,
-            nullptr)
-    };
+    std::setvbuf(stdout, nullptr, _IONBF, 0);
+    const auto connection = PipeClient::Open();
     if (!connection)
     {
-        std::cerr << std::format("Failed to open pipe: `{}` -> {}", OTDIPC::NamedPipePathA, GetLastError()) <<
-            std::endl;
+        std::cerr << connection.error() << std::endl;
         return 1;
     }
-    std::cerr << "Opened pipe" << OTDIPC::NamedPipePathA << std::endl;
     char buffer[1024];
 
     using namespace OTDIPC::Messages;
@@ -132,14 +125,19 @@ int main()
     static_assert(sizeof(buffer) >= sizeof(State));
     const auto header = reinterpret_cast<const Header* const>(buffer);
 
-    DWORD bytesRead{};
-    while (ReadFile(connection.get(), buffer, sizeof(Header), &bytesRead, nullptr))
+    while (const auto result = (*connection)->Read(buffer, sizeof(Header)))
     {
-        if (bytesRead != sizeof(Header))
+        if (!result)
         {
-            std::cerr << "bytesRead != sizeof(Header)" << std::endl;
+            std::cerr << result.error() << std::endl;
             return 1;
         }
+        if (const auto bytesRead = result.value(); bytesRead != sizeof(Header))
+        {
+            std::cerr << std::format("Read {} bytes instead of {} bytes", bytesRead, sizeof(Header)) << std::endl;
+            return 1;
+        }
+
         if (header->size < sizeof(Header))
         {
             std::cerr << std::format("header->size ({}) < sizeof(Header) ({})", header->size, sizeof(Header)) <<
@@ -152,15 +150,10 @@ int main()
                 std::endl;
             return 1;
         }
-        const DWORD bytesToRead = header->size - sizeof(Header);
-        if (!ReadFile(connection.get(), buffer + sizeof(Header), bytesToRead, &bytesRead, nullptr))
+        const auto bytesToRead = header->size - sizeof(Header);
+        if (const auto bodyResult = (*connection)->Read(buffer + sizeof(Header), bytesToRead); !bodyResult)
         {
-            std::cerr << std::format("Failed to read after header: {}", GetLastError()) << std::endl;
-            return 1;
-        }
-        if (bytesRead != bytesToRead)
-        {
-            std::cerr << std::format("Only read {} bytes after header, needed {}", bytesRead, bytesToRead) << std::endl;
+            std::cerr << std::format("Failed to read after header: {}", bodyResult.error()) << std::endl;
             return 1;
         }
 
