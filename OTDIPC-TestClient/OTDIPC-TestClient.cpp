@@ -8,12 +8,18 @@
 
 #include <iostream>
 #include <format>
+#include <string.h>
 #include <print>
 
 #include <OTD-IPC/DeviceInfo.h>
 #include <OTD-IPC/Ping.h>
 #include <OTD-IPC/State.h>
 #include <OTD-IPC/DebugMessage.h>
+
+template<std::size_t N>
+static std::string_view TruncateNulls(const char (&buf)[N]) {
+    return std::string_view(buf, strnlen(buf, N));
+}
 
 void DumpMessage(const OTDIPC::Messages::DeviceInfo* const info)
 {
@@ -30,8 +36,8 @@ void DumpMessage(const OTDIPC::Messages::DeviceInfo* const info)
         "  {}x{}\n"
         "  max pressure: {}",
         info->nonPersistentTabletId,
-        info->name,
-        info->persistentId,
+        TruncateNulls(info->name),
+        TruncateNulls(info->persistentId),
         info->vendorId,
         info->productId,
         info->maxX,
