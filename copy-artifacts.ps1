@@ -12,10 +12,6 @@
 
     Directory to copy the artifacts to
 
-.PARAMETER BuildNumber
-
-    The 'd' in 'a.b.c.d'
-
 .EXAMPLE
 
   ./copy-artifacts -Configuration Debug 
@@ -31,15 +27,14 @@ param(
   [ValidateSet('Debug', 'Release')]
   [string] $Configuration='Debug',
   [string] $Out="$(Get-Location)/out",
-  [string] $Platform="x64",
-  [int] $BuildNumber=0
+  [string] $Platform="x64"
 )
 
 If (!(Test-Path $Out)) {
   New-Item -ItemType Directory -Path $Out
 }
 
-$pluginVersion = "1.0.2.${BuildNumber}"
+$pluginVersion = $([Xml](Get-Content OTDIPC/OTDIPC.csproj)).Project.PropertyGroup.AssemblyVersion)
 Set-Content $Out/version.txt -Value $pluginVersion
 
 $metadataJson = "${Out}/metadata.json"

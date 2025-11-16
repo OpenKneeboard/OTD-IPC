@@ -18,12 +18,16 @@ jobs:
       - name: Build
         id: build
         run: |
-          msbuild OTDIPC.sln /p:Configuration="${{matrix.config}}"
+          $version = ([Xml](Get-Content OTDIPC/OTDIPC.csproj)).Project.PropertyGroup.AssemblyVersion
+          $version = ($version -split '\.')[0..2] -join '.'
+          $version = "$version.${{github.run_number}}"
+          echo "Building version $version"
+          
+          msbuild OTDIPC.sln /p:Configuration="${{matrix.config}}" "/p:AssemblyVersion=$version"
           $out = "${{runner.temp}}/out"
           ./copy-artifacts.ps1 `
             -Configuration ${{matrix.config}} `
             -Out $out `
-            -BuildNumber $Env:GITHUB_RUN_NUMBER
           Add-Content $Env:GITHUB_OUTPUT "path=$out"
           Add-Content $Env:GITHUB_OUTPUT "version=$(Get-Content $out/version.txt)"
       - name: Attach zip
