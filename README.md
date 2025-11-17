@@ -4,6 +4,8 @@ This is a filter plugin for [OpenTabletDriver], allowing 1 program at a time to 
 
 It is primarily intended for use with [OpenKneeboard], but OpenKneeboard is not required.
 
+Currently released versions are only usable on Windows. `master` is also usable on macOS, though is a volatile work in progress; it should be relatively straightforward to also make `master` also work on Linux.
+
 ## Getting Started
 
 See [the Getting Started guide](docs/getting-started.md).
@@ -15,9 +17,6 @@ I make this for my own use, and I share this in the hope others find it useful; 
 Support may be available from the community via [Discord].
 
 ## Protocol
-
-Current release versions are only usable on Windows. `master` is also usable on MacOS, though is a volatile work in progress; it should be relatively straightforward to also make `master` also work on Linux.
-
 
 In the current Windows-only version, communication is over a named pipe in message mode. The named pipe is called:
 - `"com.fredemmott.openkneeboard.OTDIPC/v0.1"` in .Net named pipe APIs
