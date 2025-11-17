@@ -8,8 +8,8 @@ all: otd-ipc-test-client
 
 proto-headers: $(PROTO_HEADERS)
 
-otd-ipc-test-client: OTDIPC-TestClient.cpp Transport.h ${PLATFORM}Transport.h ${PLATFORM}Transport.cpp $(PROTO_HEADERS)
-	"${CXX}" -o "$@" "--std=c++${CXX_STANDARD}" -I ../include OTDIPC-TestClient.cpp ${PLATFORM}Transport.cpp
+otd-ipc-test-client: OTDIPC-TestClient.cpp Transport.cpp Transport.h ${PLATFORM}Transport.h ${PLATFORM}Transport.cpp $(PROTO_HEADERS)
+	"${CXX}" -o "$@" "--std=c++${CXX_STANDARD}" -I ../include OTDIPC-TestClient.cpp Transport.cpp ${PLATFORM}Transport.cpp
 
 clean:
 	rm -f otd-ipc-test-client

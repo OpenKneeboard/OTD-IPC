@@ -17,7 +17,7 @@
 
 namespace
 {
-    std::expected<std::filesystem::path, std::string> GetSocketPath() noexcept
+    std::expected<std::filesystem::path, std::string> GetApplicationSupportPath() noexcept
     {
         char appSupport[PATH_MAX];
         {
@@ -43,8 +43,7 @@ namespace
             }
         }
         wordfree(&p);
-
-        return std::filesystem::path {expandedAppSupport} / "otd-ipc" / "sock";
+        return std::filesystem::path{expandedAppSupport};
     }
 }
 
@@ -55,7 +54,11 @@ std::expected<std::unique_ptr<Transport>, std::string> Transport::Open() noexcep
 
 std::expected<std::unique_ptr<Transport>, std::string> DarwinTransport::Open() noexcept
 {
-    const auto path = GetSocketPath();
+    const auto appSupport = GetApplicationSupportPath();
+    if (!appSupport) {
+        return std::unexpected{appSupport.error()};
+    }
+    const auto path = GetSocketPath(*appSupport);
     if (!path)
     {
         return std::unexpected{path.error()};
