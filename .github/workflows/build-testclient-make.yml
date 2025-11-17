@@ -1,0 +1,11 @@
+﻿name: Build Test Client (make)
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build Test Client (macOS)
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build with make
+        run: make -C OTDIPC-TestClient
