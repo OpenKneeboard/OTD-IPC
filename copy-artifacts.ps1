@@ -34,7 +34,8 @@ If (!(Test-Path $Out)) {
   New-Item -ItemType Directory -Path $Out
 }
 
-$pluginVersion = $([Xml](Get-Content OTDIPC/OTDIPC.csproj)).Project.PropertyGroup.AssemblyVersion)
+$proj = [Xml](Get-Content OTDIPC/OTDIPC.csproj)
+$pluginVersion = $proj.Project.PropertyGroup.AssemblyVersion
 Set-Content $Out/version.txt -Value $pluginVersion
 
 $metadataJson = "${Out}/metadata.json"
