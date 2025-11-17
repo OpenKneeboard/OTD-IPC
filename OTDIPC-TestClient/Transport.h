@@ -5,6 +5,7 @@
 #include <expected>
 #include <string>
 #include <memory>
+#include <filesystem>
 
 class Transport
 {
@@ -14,4 +15,6 @@ public:
     virtual ~Transport() = default;
     
     virtual std::expected<size_t, std::string> Read(void* buffer, size_t bufferSize) noexcept = 0;
+    
+    static std::expected<std::filesystem::path, std::string> GetSocketPath(const std::filesystem::path& localAppDataRoot) noexcept;
 };

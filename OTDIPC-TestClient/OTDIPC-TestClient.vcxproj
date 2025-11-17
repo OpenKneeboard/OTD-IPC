@@ -139,6 +139,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="OTDIPC-TestClient.cpp" />
+    <ClCompile Include="Transport.cpp" />
     <ClCompile Include="WindowsTransport.cpp" />
   </ItemGroup>
   <ItemGroup>

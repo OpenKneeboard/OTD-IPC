@@ -18,17 +18,7 @@ namespace
         void operator()(auto p) const noexcept { CoTaskMemFree(p); }
     };
 
-    std::expected<std::filesystem::path, std::string> GetSocketPath() noexcept
-    {
-        std::unique_ptr<wchar_t, TaskMemDeleter> parent;
-        if (const auto hr = SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_DEFAULT, nullptr, std::out_ptr(parent));
-            FAILED(hr))
-        {
-            return std::unexpected{std::format("SHGetKnownFolderPath failed with HRESULT {}", hr)};
-        }
-        return std::filesystem::path{parent.get()} / "otd-ipc" / "sock";
-    }
-    
+
     bool file_exists(const std::filesystem::path& path) noexcept
     {
         std::error_code ec;
@@ -36,8 +26,18 @@ namespace
         // Error on unix sockets - https://github.com/microsoft/STL/issues/4077
         return ec.value() == ERROR_CANT_ACCESS_FILE;
     }
-}
 
+    std::expected<std::filesystem::path, std::string> GetLocalAppDataPath() noexcept
+    {
+        std::unique_ptr<wchar_t, TaskMemDeleter> buffer;
+        if (const auto hr = SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_DEFAULT, nullptr, std::out_ptr(buffer));
+            FAILED(hr))
+        {
+            return std::unexpected{std::format("SHGetKnownFolderPath failed with HRESULT {}", hr)};
+        }
+        return std::filesystem::path{buffer.get()};
+    }
+}
 
 std::expected<std::unique_ptr<Transport>, std::string> Transport::Open() noexcept
 {
@@ -46,16 +46,22 @@ std::expected<std::unique_ptr<Transport>, std::string> Transport::Open() noexcep
 
 std::expected<std::unique_ptr<Transport>, std::string> WindowsTransport::Open() noexcept
 {
-    const auto path = GetSocketPath();
+    const auto localAppDataRoot = GetLocalAppDataPath();
+    if (!localAppDataRoot)
+    {
+        return std::unexpected{localAppDataRoot.error()};
+    }
+    const auto path = Transport::GetSocketPath(*localAppDataRoot);
     if (!path)
     {
         return std::unexpected{path.error()};
     }
-    
-    if (!file_exists(*path)) {
-      return std::unexpected{std::format("Socket `{}` does not exist", path->string())};
+
+    if (!file_exists(*path))
+    {
+        return std::unexpected{std::format("Socket `{}` does not exist", path->string())};
     }
-    
+
     // Initialize Winsock once; if another part already initialized, it's fine
     WSADATA wsaData{};
     const auto wsa = WSAStartup(MAKEWORD(2, 2), &wsaData);

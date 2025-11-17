@@ -46,5 +46,6 @@ private:
     };
 
     explicit WindowsTransport(unique_socket s) noexcept;
+private:
     unique_socket mSocket{};
 };
