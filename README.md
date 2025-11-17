@@ -2,7 +2,7 @@
 
 This is a filter plugin for [OpenTabletDriver], allowing 1 program at a time to directly read the state of the tablet. When in use, the active OpenTabletDriver output mode is disabled.
 
-It is primarily intended for use with [OpenKneeboard].
+It is primarily intended for use with [OpenKneeboard], but OpenKneeboard is not required.
 
 ## Getting Started
 
@@ -15,6 +15,8 @@ I make this for my own use, and I share this in the hope others find it useful; 
 Support may be available from the community via [Discord].
 
 ## Protocol
+
+Current release versions are only usable on Windows. `master` is also usable on MacOS, though is a volatile work in progress; it should be relatively straightforward to also make it work on Linux.
 
 Communication is over a named pipe in message mode. The named pipe is called:
 - `"com.fredemmott.openkneeboard.OTDIPC/v0.1"` in .Net named pipe APIs
