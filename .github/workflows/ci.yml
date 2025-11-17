@@ -2,19 +2,16 @@ name: Continuous Integration
 on: [push, pull_request]
 jobs:
   build:
-    name: Build (${{matrix.config}})
-    runs-on: windows-2022
+    name: Build (${{matrix.os}}/${{matrix.config}})
+    runs-on: ${{matrix.os}}
     strategy:
       matrix:
         config: [Release, Debug]
+        os: [windows-2022, macos-26]
     steps:
       - uses: actions/checkout@v4
       - name: Fetch nuget packages
         run: dotnet restore
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v2
-        with:
-          vs-version: '[17.2,)'
       - name: Build
         id: build
         shell: pwsh
@@ -25,7 +22,7 @@ jobs:
           $version = "$version.${{github.run_number}}"
           echo "Building version $version"
           
-          msbuild OTDIPC.sln /p:Configuration="${{matrix.config}}" "/p:AssemblyVersion=$version"
+          dotnet msbuild OTDIPC.sln /p:Configuration="${{matrix.config}}" "/p:AssemblyVersion=$version"
           $out = "${{runner.temp}}/out"
           ./copy-artifacts.ps1 `
             -Configuration ${{matrix.config}} `
@@ -33,26 +30,20 @@ jobs:
           Add-Content $Env:GITHUB_OUTPUT "path=$out"
           Add-Content $Env:GITHUB_OUTPUT "version=$(Get-Content $out/version.txt)"
       - name: Attach zip
-        if: matrix.config != 'Debug'
+        if: matrix.config != 'Debug' && matrix.os == 'windows-2022'
         uses: actions/upload-artifact@v4
         with:
           name: OpenKneeboard-OTD-IPC-v${{steps.build.outputs.version}}
           path: ${{steps.build.outputs.path}}/OpenKneeboard-OTD-IPC.zip
-      - name: Attach test client
-        if: matrix.config != 'Debug'
-        uses: actions/upload-artifact@v4
-        with:
-          name: OpenKneeboard-OTD-IPC-TestClient-v${{steps.build.outputs.version}}
-          path: ${{steps.build.outputs.path}}/OTDIPC-TestClient.exe
       - name: Attach debug symbols
-        if: matrix.config != 'Debug'
+        if: matrix.config != 'Debug' && matrix.os == 'windows-2022'
         uses: actions/upload-artifact@v4
         with:
           name: OpenKneeboard-OTD-IPC-DebugSymbols-v${{steps.build.outputs.version}}
           path: ${{steps.build.outputs.path}}/*.pdb
       - name: Create draft release
         id: create-release
-        if: github.ref_type == 'tag' && matrix.config != 'Debug'
+        if: github.ref_type == 'tag' && matrix.config != 'Debug' && matrix.os == 'windows-2022'
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}     
@@ -71,18 +62,8 @@ jobs:
           asset_name: OpenKneeboard-OTD-IPC-v${{steps.build.outputs.version}}.zip
           asset_path: ${{steps.build.outputs.path}}/OpenKneeboard-OTD-IPC.zip
           asset_content_type: application/zip
-      - name: Attach test client to release
-        if: github.ref_type == 'tag' && matrix.config != 'Debug'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_name: OpenKneeboard-OTD-IPC-TestClient-v${{steps.build.outputs.version}}.exe
-          asset_path: ${{steps.build.outputs.path}}/OTDIPC-TestClient.exe
-          asset_content_type: application/x-ms-download
       - name: Attach debug symbols
-        if: github.ref_type == 'tag' && matrix.config != 'Debug'
+        if: github.ref_type == 'tag' && matrix.config != 'Debug' && matrix.os == 'windows-2022'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN }}
