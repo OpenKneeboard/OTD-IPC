@@ -129,35 +129,38 @@ namespace OTDIPC
 
             try { _connection?.Dispose(); } catch { }
             _connection = null;
-            try { _listener?.Dispose(); } catch { }
-            _listener = null;
 
-            Log.Write("otd-ipc", "Starting unix domain socket server at " + _socketPath);
-            try
+            if (_listener == null)
             {
-                // On Unix, ensure any previous socket file is removed
-                if (System.IO.File.Exists(_socketPath))
-                {
-                    System.IO.File.Delete(_socketPath);
-                }
-                
-                var directory = Path.GetDirectoryName(_socketPath)!;
-                if (!Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-            }
-            catch { }
 
-            var listener = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
-            listener.Bind(new UnixDomainSocketEndPoint(_socketPath));
-            listener.Listen(1);
-            _listener = listener;
-            
-            PublishDiscoveryData();
+                Log.Write("otd-ipc", "Starting unix domain socket server at " + _socketPath);
+                try
+                {
+                    // On Unix, ensure any previous socket file is removed
+                    if (System.IO.File.Exists(_socketPath))
+                    {
+                        System.IO.File.Delete(_socketPath);
+                    }
+
+                    var directory = Path.GetDirectoryName(_socketPath)!;
+                    if (!Directory.Exists(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+                }
+                catch
+                {
+                }
+
+                var listener = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
+                listener.Bind(new UnixDomainSocketEndPoint(_socketPath));
+                listener.Listen(1);
+                _listener = listener;
+                PublishDiscoveryData();
+            }
 
             Log.Write("otd-ipc", "Waiting for connection");
-            var client = await listener.AcceptAsync();
+            var client = await _listener.AcceptAsync();
             Log.Write("otd-ipc", "Client connected");
             _connection = client;
             _waitingForConnection = false;
