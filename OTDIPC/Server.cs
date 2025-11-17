@@ -9,6 +9,7 @@ using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Tablet;
 using System.Net.Sockets;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -18,6 +19,8 @@ namespace OTDIPC
     [PluginName("OpenKneeboard (OTD-IPC)")]
     public class Server
     {
+        private const string MyImplementationId = "otd-ipc.openkneeboard.com";
+        
         Ping _Ping = new();
         Socket? _connection;
         Socket? _listener;
@@ -150,6 +153,8 @@ namespace OTDIPC
             listener.Bind(new UnixDomainSocketEndPoint(_socketPath));
             listener.Listen(1);
             _listener = listener;
+            
+            PublishDiscoveryData();
 
             Log.Write("otd-ipc", "Waiting for connection");
             var client = await listener.AcceptAsync();
@@ -175,6 +180,69 @@ namespace OTDIPC
             var prefix = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var path = Path.Join(prefix, "otd-ipc", "sock");
             return path;
+        }
+
+        static void PublishDiscoveryData()
+        {
+            var prefix = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var root = Path.Join(prefix, "otd-ipc", "servers", "v2");
+            var metadataFile = Path.Join(root, "available", $"{MyImplementationId}.txt");
+
+            try
+            {
+                var directory = Path.GetDirectoryName(metadataFile)!;
+                if (!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Write("otd-ipc", $"failed to create discovery directory: {e.Message}", LogLevel.Error);
+                return;
+            }
+
+            try
+            {
+                var version = Assembly.GetExecutingAssembly().GetName().Version;
+                var semver = version != null 
+                    ? $"{version.Major}.{version.Minor}.{version.Build}+revision.{version.Revision}"
+                    : "0.0.0+revision.0";
+
+                var entry = Assembly.GetEntryAssembly()?.GetName();
+                var contents = $@"
+ID={MyImplementationId}
+NAME=OpenTabletDriver OTD-IPC Plugin
+SEMVER={semver}
+DEBUG_VERSION=OTD-IPC v{version}/{entry?.Name} v{entry?.Version}
+HOMEPAGE=https://github.com/OpenKneeboard/OTD-IPC
+SOCKET={GetSocketPath()}
+".TrimStart();
+                File.WriteAllText(metadataFile, contents);
+            }
+            catch (Exception e)
+            {
+                Log.Write("otd-ipc", $"failed to write discovery metadata file: {e.Message}", LogLevel.Error);
+                return;
+            }
+            Log.Write("otd-ipc", $"published discovery metadata file: {metadataFile}");
+
+            var defaultPath = Path.Join(root, "default.txt");
+            if (File.Exists(defaultPath))
+            {
+                Log.Debug("otd-ipc", $"discovery defaults file already exists: {defaultPath}");
+                return;
+            }
+
+            try
+            {
+                File.WriteAllText(defaultPath, MyImplementationId);
+            }
+            catch (Exception e)
+            {
+                Log.Write("otd-ipc", $"failed to write discovery defaults file: {e.Message}", LogLevel.Error);
+            }
+            Log.Write("otd-ipc", $"published discovery defaults file: {defaultPath}");
         }
 
     }
