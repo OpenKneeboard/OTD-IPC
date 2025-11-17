@@ -15,21 +15,36 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="OTDIPC-TestClient.cpp">
+    <ClCompile Include="../OTDIPC-TestClient/OTDIPC-TestClient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="../OTDIPC-TestClient/Transport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="../OTDIPC-TestClient/WindowsTransport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="../include/OTD-IPC/DeviceInfo.h">
+    <ClInclude Include="../../include/OTD-IPC/DeviceInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="../include/OTD-IPC/Header.h">
+    <ClInclude Include="../../include/OTD-IPC/Header.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="../include/OTD-IPC/MessageType.h">
+    <ClInclude Include="../../include/OTD-IPC/MessageType.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="../include/OTD-IPC/State.h">
+    <ClInclude Include="../../include/OTD-IPC/State.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="../../include/OTD-IPC/DebugMessage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="../OTDIPC-TestClient/Transport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="../OTDIPC-TestClient/WindowsTransport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

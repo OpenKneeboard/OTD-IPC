@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -72,10 +72,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);../include</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);../../include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);../include</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);../../include</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -138,18 +138,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="OTDIPC-TestClient.cpp" />
-    <ClCompile Include="Transport.cpp" />
-    <ClCompile Include="WindowsTransport.cpp" />
+    <ClCompile Include="../OTDIPC-TestClient.cpp" />
+    <ClCompile Include="../Transport.cpp" />
+    <ClCompile Include="../WindowsTransport.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="../include/OTD-IPC/DeviceInfo.h" />
-    <ClInclude Include="../include/OTD-IPC/Header.h" />
-    <ClInclude Include="../include/OTD-IPC/MessageType.h" />
-    <ClInclude Include="../include/OTD-IPC/State.h" />
-    <ClInclude Include="..\include\OTD-IPC\DebugMessage.h" />
-    <ClInclude Include="Transport.h" />
-    <ClInclude Include="WindowsTransport.h" />
+    <ClInclude Include="../../include/OTD-IPC/DeviceInfo.h" />
+    <ClInclude Include="../../include/OTD-IPC/Header.h" />
+    <ClInclude Include="../../include/OTD-IPC/MessageType.h" />
+    <ClInclude Include="../../include/OTD-IPC/State.h" />
+    <ClInclude Include="../../include/OTD-IPC/DebugMessage.h" />
+    <ClInclude Include="../Transport.h" />
+    <ClInclude Include="../WindowsTransport.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
