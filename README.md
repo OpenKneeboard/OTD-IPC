@@ -16,11 +16,14 @@ Support may be available from the community via [Discord].
 
 ## Protocol
 
-Current release versions are only usable on Windows. `master` is also usable on MacOS, though is a volatile work in progress; it should be relatively straightforward to also make it work on Linux.
+Current release versions are only usable on Windows. `master` is also usable on MacOS, though is a volatile work in progress; it should be relatively straightforward to also make `master` also work on Linux.
 
-Communication is over a named pipe in message mode. The named pipe is called:
+
+In the current Windows-only version, communication is over a named pipe in message mode. The named pipe is called:
 - `"com.fredemmott.openkneeboard.OTDIPC/v0.1"` in .Net named pipe APIs
 - `"\\.\pipe\com.fredemmott.openkneeboard.OTDIPC/v0.1"` when using `CreateFile()` or similar APIs, e.g. in C++
+
+In `master`, communication is over a Unix socket with a varying path, to allow multiple server implementations. Socket paths can be [discovered](https://github.com/OpenKneeboard/OTD-IPC/issues/18#issuecomment-3542327853).
 
 One client is supported at a time - this is intended to be an exclusive mode.
 
