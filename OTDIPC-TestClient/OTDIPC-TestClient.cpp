@@ -87,10 +87,7 @@ void DumpMessage(const OTDIPC::Messages::State* const state)
 
 void DumpMessage(const OTDIPC::Messages::Ping* const msg)
 {
-    std::println(
-        "{:08x} Ping {:#016x}",
-        msg->nonPersistentTabletId,
-        msg->sequenceNumber);
+    std::println("Ping {:#016x}", msg->sequenceNumber);
 }
 
 void DumpMessage(const OTDIPC::Messages::DebugMessage* const msg)
