@@ -1,0 +1,24 @@
+﻿name: Build test client (msbuild)
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build test client (Windows/${{matrix.config}})
+    runs-on: windows-2022
+    strategy: 
+      matrix:
+        config: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build
+        shell: pwsh
+        run: >
+          msbuild "OTDIPC-TestClient\VisualStudio\OTDIPC-TestClient.sln"
+          /m
+          /p:Configuration=${{matrix.config}}
+          /p:Platform=x64
