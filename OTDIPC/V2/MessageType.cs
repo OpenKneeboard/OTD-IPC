@@ -5,7 +5,7 @@
  */
 using System.Runtime.InteropServices;
 
-namespace OTDIPC
+namespace OTDIPC.V2
 {
     enum MessageType : UInt32
     {

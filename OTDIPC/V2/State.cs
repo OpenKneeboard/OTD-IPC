@@ -5,7 +5,7 @@
  */
 using System.Runtime.InteropServices;
 
-namespace OTDIPC
+namespace OTDIPC.V2
 {
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
     struct State

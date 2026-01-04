@@ -14,8 +14,8 @@ namespace OTDIPC
     [PluginName("OpenKneeboard (OTD-IPC)")]
     public class OTDIPC : IPositionedPipelineElement<IDeviceReport>
     {
-        State _state = new();
-        DeviceInfo _deviceInfo = new();
+        V2.State _state = new();
+        V2.DeviceInfo _deviceInfo = new();
         private readonly string _implementationIdDebugMessage = GenerateImplementationIdDebugMessage();
         private static UInt32 _nextNonPersistentTabletId = 1;
 

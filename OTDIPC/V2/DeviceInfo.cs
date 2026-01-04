@@ -7,7 +7,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace OTDIPC
+namespace OTDIPC.V2
 {
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
     unsafe struct DeviceInfo

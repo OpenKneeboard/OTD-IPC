@@ -16,12 +16,11 @@ using System.Text;
 
 namespace OTDIPC
 {
-    [PluginName("OpenKneeboard (OTD-IPC)")]
     public class Server
     {
         private const string MyImplementationId = "otd-ipc.openkneeboard.com";
         
-        Ping _Ping = new();
+        V2.Ping _Ping = new();
         Socket? _connection;
         Socket? _listener;
         Timer? _timer;
@@ -36,10 +35,10 @@ namespace OTDIPC
         public void SendDebugMessage(string message)
         {
             var bytes = Encoding.UTF8.GetBytes(message);
-            Header header = new()
+            V2.Header header = new()
             {
-                MessageType = MessageType.DebugMessage,
-                Size = (UInt32)(Marshal.SizeOf<Header>() + bytes.Length),
+                MessageType = V2.MessageType.DebugMessage,
+                Size = (UInt32)(Marshal.SizeOf<V2.Header>() + bytes.Length),
             };
             SendMessage(header);
             WriteBytes(bytes);
