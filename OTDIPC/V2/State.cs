@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: MIT
  */
+
 using System.Runtime.InteropServices;
 
 namespace OTDIPC.V2
@@ -36,6 +37,5 @@ namespace OTDIPC.V2
         public bool ProximityValid = false;
         public UInt32 HoverDistance = 0;
         public bool NearPromixity = false;
-
     }
 }

@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: MIT
  */
+
 using System.Runtime.InteropServices;
 
 namespace OTDIPC.V2
@@ -14,9 +15,10 @@ namespace OTDIPC.V2
         {
         }
 
-        public Header Header = new() {
+        public Header Header = new()
+        {
             MessageType = MessageType.Ping,
-            Size = (UInt32) Marshal.SizeOf(typeof(Ping)),
+            Size = (UInt32)Marshal.SizeOf(typeof(Ping)),
         };
 
         public UInt64 SequenceNumber = 0;

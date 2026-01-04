@@ -3,12 +3,14 @@
  *
  * SPDX-License-Identifier: ISC
  */
+
 using System.Runtime.InteropServices;
 
 namespace OTDIPC.V1
 {
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
-    struct Header {
+    struct Header
+    {
         public MessageType MessageType;
         public UInt32 Size;
         public UInt16 VID;

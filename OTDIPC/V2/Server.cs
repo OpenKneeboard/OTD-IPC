@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: MIT
  */
+
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.Plugin.Output;
@@ -14,12 +15,12 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace OTDIPC
+namespace OTDIPC.V2
 {
     public class Server
     {
         private const string MyImplementationId = "otd-ipc.openkneeboard.com";
-        
+
         V2.Ping _Ping = new();
         Socket? _connection;
         Socket? _listener;
@@ -28,8 +29,9 @@ namespace OTDIPC
         bool _connected;
         private readonly string _socketPath = GetSocketPath();
 
-        public Server() {
-            _timer = new ((_) => { this.Ping(); }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+        public Server()
+        {
+            _timer = new((_) => { this.Ping(); }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         }
 
         public void SendDebugMessage(string message)
@@ -44,7 +46,7 @@ namespace OTDIPC
             WriteBytes(bytes);
         }
 
-        public void SendMessage<T>(T message) where T : unmanaged 
+        public void SendMessage<T>(T message) where T : unmanaged
         {
             if (_connection == null)
             {
@@ -71,7 +73,8 @@ namespace OTDIPC
             {
                 OnFailedWrite();
             }
-            catch (ObjectDisposedException) {
+            catch (ObjectDisposedException)
+            {
                 // If we think the client's hung, we can close the connection
                 // while a write is in progress; this is especially common
                 // for ping writes.
@@ -83,8 +86,10 @@ namespace OTDIPC
             }
         }
 
-        void WriteBytes(ReadOnlySpan<byte> bytes) {
-            if (_connection == null) {
+        void WriteBytes(ReadOnlySpan<byte> bytes)
+        {
+            if (_connection == null)
+            {
                 return;
             }
 
@@ -97,6 +102,7 @@ namespace OTDIPC
                 {
                     throw new SocketException();
                 }
+
                 totalSent += sent;
             }
         }
@@ -107,16 +113,28 @@ namespace OTDIPC
             {
                 return;
             }
+
             System.Diagnostics.Debug.WriteLine("Error writing to unix domain socket, resetting server");
             _connected = false;
-            try { _connection?.Dispose(); } catch { }
+            try
+            {
+                _connection?.Dispose();
+            }
+            catch
+            {
+            }
+
             _connection = null;
             RunServerAsync();
         }
 
-        public bool HaveClient { get => _connected; }
+        public bool HaveClient
+        {
+            get => _connected;
+        }
 
         public event Action? ClientConnected;
+
         async Task RunServerAsync()
         {
             if (_waitingForConnection)
@@ -126,12 +144,18 @@ namespace OTDIPC
 
             _waitingForConnection = true;
 
-            try { _connection?.Dispose(); } catch { }
+            try
+            {
+                _connection?.Dispose();
+            }
+            catch
+            {
+            }
+
             _connection = null;
 
             if (_listener == null)
             {
-
                 Log.Write("otd-ipc", "Starting unix domain socket server at " + _socketPath);
                 try
                 {
@@ -168,11 +192,13 @@ namespace OTDIPC
             ClientConnected?.Invoke();
         }
 
-        void Ping() {
+        void Ping()
+        {
             if (_waitingForConnection)
             {
                 return;
             }
+
             _Ping.SequenceNumber++;
             SendMessage(_Ping);
         }
@@ -207,7 +233,7 @@ namespace OTDIPC
             try
             {
                 var version = Assembly.GetExecutingAssembly().GetName().Version;
-                var semver = version != null 
+                var semver = version != null
                     ? $"{version.Major}.{version.Minor}.{version.Build}+revision.{version.Revision}"
                     : "0.0.0+revision.0";
 
@@ -227,6 +253,7 @@ SOCKET={GetSocketPath()}
                 Log.Write("otd-ipc", $"failed to write discovery metadata file: {e.Message}", LogLevel.Error);
                 return;
             }
+
             Log.Write("otd-ipc", $"published discovery metadata file: {metadataFile}");
 
             var defaultPath = Path.Join(root, "default.txt");
@@ -244,9 +271,8 @@ SOCKET={GetSocketPath()}
             {
                 Log.Write("otd-ipc", $"failed to write discovery defaults file: {e.Message}", LogLevel.Error);
             }
+
             Log.Write("otd-ipc", $"published discovery defaults file: {defaultPath}");
         }
-
     }
-
 }
