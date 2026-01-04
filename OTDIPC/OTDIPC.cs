@@ -155,12 +155,14 @@ namespace OTDIPC
                 var id = _tablet.Identifiers.First();
                 if (id != null)
                 {
+                    var vendorId = (UInt16) id.VendorID;
+                    var productId = (UInt16)id.ProductID;
                     _deviceInfo.PersistentId =
-                        $"otd-ipc.openkneeboard.com/vid-pid/{_deviceInfo.VendorId:X4}-{_deviceInfo.ProductId:X4}";
+                        $"otd-ipc.openkneeboard.com/vid-pid/{vendorId:X4}-{productId:X4}";
                     // Marked obsolete, but we still want to populate them for existing clients
 #pragma warning disable CS0618
-                    _deviceInfo.VendorId = (UInt16)id.VendorID;
-                    _deviceInfo.ProductId = (UInt16)id.ProductID;
+                    _deviceInfo.VendorId = vendorId;
+                    _deviceInfo.ProductId = productId;
 #pragma warning restore CS0618
                 }
 
