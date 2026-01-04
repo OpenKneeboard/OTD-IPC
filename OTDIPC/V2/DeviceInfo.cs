@@ -26,8 +26,14 @@ namespace OTDIPC.V2
         public float MaxX = 0;
         public float MaxY = 0;
         public UInt32 MaxPressure = 0;
-        public UInt16 VendorId = 0; // Deprecated: use PersistentId instead. Used to allow matching with other data sources
-        public UInt16 ProductId = 0; // Deprecated: use PersistentId instead. Used to allow matching with other data sources
+        // Obsolete because:
+        // - some implementations (e.g. wintab) might not expose VendorID/ProductID
+        // - some tablets ('10moons') do not have *unique* VendorID/ProductID
+        // ... probably shouldn't be matching by them anyway. Just need a unique ID.
+        [Obsolete("Use PersistentId instead. This remains so that clients that previously saw a device with V1 can recognize them with V2")]
+        public UInt16 VendorId = 0;
+        [Obsolete("Use PersistentId instead. This remains so that clients that previously saw a device with V1 can recognize them with V2")]
+        public UInt16 ProductId = 0;
         
         private const int PersistentIdMaxLength = 256;
         private fixed byte _PersistentId[PersistentIdMaxLength];

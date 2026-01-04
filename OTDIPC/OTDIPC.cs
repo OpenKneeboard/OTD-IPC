@@ -56,6 +56,7 @@ namespace OTDIPC
                 Emit?.Invoke(deviceReport);
                 return;
             }
+
             bool changed = false;
 
             if (deviceReport is IAbsolutePositionReport absolutePositionReport)
@@ -83,6 +84,7 @@ namespace OTDIPC
                         _state.PenButtons &= (UInt32)~(1 << i);
                     }
                 }
+
                 _state.PenButtonsValid = true;
             }
 
@@ -109,6 +111,7 @@ namespace OTDIPC
                         _state.AuxButtons &= (UInt32)~(1 << i);
                     }
                 }
+
                 _state.AuxButtonsValid = true;
             }
 
@@ -126,7 +129,11 @@ namespace OTDIPC
         }
 
         public event Action<IDeviceReport>? Emit;
-        public PipelinePosition Position { get => PipelinePosition.Raw; }
+
+        public PipelinePosition Position
+        {
+            get => PipelinePosition.Raw;
+        }
 
         TabletReference? _tablet;
 
@@ -148,12 +155,15 @@ namespace OTDIPC
                 var id = _tablet.Identifiers.First();
                 if (id != null)
                 {
-                    _deviceInfo.VendorId = (UInt16)id.VendorID;
-                    _deviceInfo.ProductId = (UInt16)id.ProductID;
                     _deviceInfo.PersistentId =
                         $"otd-ipc.openkneeboard.com/vid-pid/{_deviceInfo.VendorId:X4}-{_deviceInfo.ProductId:X4}";
+                    // Marked obsolete, but we still want to populate them for existing clients
+#pragma warning disable CS0618
+                    _deviceInfo.VendorId = (UInt16)id.VendorID;
+                    _deviceInfo.ProductId = (UInt16)id.ProductID;
+#pragma warning restore CS0618
                 }
-                
+
                 _deviceInfo.Header.NonPersistentTabletId = _nextNonPersistentTabletId++;
 
                 _state = new();
@@ -169,7 +179,5 @@ namespace OTDIPC
             var otd = Assembly.GetEntryAssembly()?.GetName();
             return $"OTD-IPC: `{self.Name}` v{self.Version} running on `{otd?.Name}` v{otd?.Version}";
         }
-
     }
-    
 }
