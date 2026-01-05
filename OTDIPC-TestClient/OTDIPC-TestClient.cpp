@@ -8,7 +8,7 @@
 
 #include <iostream>
 #include <format>
-#include <string.h>
+#include <cstring>
 #include <print>
 
 #include <OTD-IPC/DeviceInfo.h>
@@ -23,12 +23,6 @@ static std::string_view TruncateNulls(const char (&buf)[N]) {
 
 void DumpMessage(const OTDIPC::Messages::DeviceInfo* const info)
 {
-    if (!info->isValid)
-    {
-        std::println("Received invalid deviceInfo");
-        return;
-    }
-
     std::println(
         "Device {:04x}: {}\n"
         "  Persistent ID: {}\n"

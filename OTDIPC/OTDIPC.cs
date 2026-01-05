@@ -127,7 +127,6 @@ namespace OTDIPC
                 var specs = _tablet.Properties.Specifications.Digitizer;
                 var info = new DeviceInfo
                 {
-                    IsValid = true,
                     Name = _tablet.Properties.Name,
                     MaxX = specs.MaxX,
                     MaxY = specs.MaxY,

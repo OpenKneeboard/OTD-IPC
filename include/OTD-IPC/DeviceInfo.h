@@ -14,7 +14,6 @@ namespace OTDIPC::Messages {
 		static constexpr std::size_t PersistentIdMaxLength = 256;
 		static constexpr std::size_t NameMaxLength = 256;
 
-		bool isValid {};
 		float maxX {};
 		float maxY {};
 		uint32_t maxPressure {};

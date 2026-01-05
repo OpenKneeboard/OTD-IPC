@@ -22,7 +22,6 @@ namespace OTDIPC.V2
             Size = (UInt32)Marshal.SizeOf(typeof(DeviceInfo)),
         };
 
-        public bool IsValid = false;
         public float MaxX = 0;
         public float MaxY = 0;
 
