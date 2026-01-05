@@ -3,8 +3,11 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: Build Test Client (macOS)
-    runs-on: macos-26
+    strategy:
+      matrix:
+        os: [macos-26, ubuntu-24.04]
+    name: Build Test Client (${{matrix.os}})
+    runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
       - name: Build with make
