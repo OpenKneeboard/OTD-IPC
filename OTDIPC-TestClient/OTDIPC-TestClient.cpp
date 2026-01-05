@@ -72,8 +72,10 @@ void DumpMessage(const OTDIPC::Messages::State *const state) {
         bits.emplace_back("PenButtons");
     if (state->HasData(AuxButtons))
         bits.emplace_back("AuxButtons");
-    if (state->HasData(Proximity))
-        bits.emplace_back("Proximity");
+    if (state->HasData(PenIsNearSurface))
+        bits.emplace_back("PenIsNearSurface");
+    if (state->HasData(HoverDistance))
+        bits.emplace_back("HoverDistance");
 
     // Not using `join_with` because it's not yet available on macOS
     const auto bitsStr = std::ranges::fold_left(
@@ -95,7 +97,7 @@ void DumpMessage(const OTDIPC::Messages::State *const state) {
         state->y,
         state->hoverDistance,
         state->pressure,
-        state->nearProximity,
+        state->penIsNearSurface,
         penButtons,
         auxButtons,
         bitsStr);
