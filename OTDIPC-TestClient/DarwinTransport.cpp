@@ -120,36 +120,6 @@ std::expected<size_t, std::string> DarwinTransport::Read(void* buffer, const siz
     return total;
 }
 
-DarwinTransport::unique_fd::~unique_fd() noexcept
-{
-    if (mFD >= 0) { ::close(mFD); mFD = -1; }
-}
-
-DarwinTransport::unique_fd::unique_fd(unique_fd&& other) noexcept : mFD(std::exchange(other.mFD, -1))
-{
-}
-
-DarwinTransport::unique_fd& DarwinTransport::unique_fd::operator=(unique_fd&& other) noexcept
-{
-    if (this != &other)
-    {
-        if (mFD >= 0) { ::close(mFD); }
-        mFD = std::exchange(other.mFD, -1);
-    }
-    return *this;
-}
-
-int DarwinTransport::unique_fd::release() noexcept
-{
-    return std::exchange(mFD, -1);
-}
-
-void DarwinTransport::unique_fd::reset(const int fd) noexcept
-{
-    if (mFD >= 0) { ::close(mFD); }
-    mFD = fd >= 0 ? fd : -1;
-}
-
 DarwinTransport::DarwinTransport(unique_fd fd) noexcept : mFD(std::move(fd))
 {
 }
