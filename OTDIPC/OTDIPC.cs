@@ -89,9 +89,9 @@ namespace OTDIPC
             if (deviceReport is IProximityReport proximityReport)
             {
                 changed = true;
-                _state.NearPromixity = proximityReport.NearProximity;
+                _state.PenIsNearSurface = proximityReport.NearProximity;
                 _state.HoverDistance = proximityReport.HoverDistance;
-                _state.ValidBits |= State.ValidMask.Proximity;
+                _state.ValidBits |= State.ValidMask.PenIsNearSurface | State.ValidMask.HoverDistance;
             }
 
             if (deviceReport is IAuxReport auxReport)

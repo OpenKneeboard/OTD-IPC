@@ -173,9 +173,9 @@ public class Server : ServerBase
             PenButtons = v2.PenButtons,
             AuxButtonsValid = v2.ValidBits.HasFlag(V2.State.ValidMask.AuxButtons),
             AuxButtons = v2.AuxButtons,
-            ProximityValid = v2.ValidBits.HasFlag(V2.State.ValidMask.Proximity),
+            ProximityValid = v2.ValidBits.HasFlag(V2.State.ValidMask.PenIsNearSurface),
             HoverDistance = v2.HoverDistance,
-            NearPromixity = v2.NearPromixity
+            NearProximity = v2.PenIsNearSurface
         };
     }
 }

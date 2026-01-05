@@ -15,11 +15,15 @@ namespace OTDIPC::inline V2::Messages {
 
         enum class ValidMask : uint32_t {
             None = 0,
-            Position = 1 << 0,
-            Pressure = 1 << 1,
-            PenButtons = 1 << 2,
-            AuxButtons = 1 << 3,
-            Proximity = 1 << 4,
+            PositionX = 1 << 0,
+            PositionY = 1 << 1,
+            Pressure = 1 << 2,
+            PenButtons = 1 << 3,
+            AuxButtons = 1 << 4,
+            PenIsNearSurface = 1 << 5,
+            HoverDistance = 1 << 6,
+
+            Position = PositionX | PositionY,
         };
 
         ValidMask validBits;
@@ -31,7 +35,7 @@ namespace OTDIPC::inline V2::Messages {
         uint32_t penButtons;
         uint32_t auxButtons;
         uint32_t hoverDistance;
-        bool nearProximity;
+        bool penIsNearSurface;
 
         constexpr bool HasData(const ValidMask mask) const noexcept {
             const auto underlying = std::to_underlying(mask);

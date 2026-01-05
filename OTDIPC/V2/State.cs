@@ -25,11 +25,16 @@ namespace OTDIPC.V2
         public enum ValidMask : UInt32
         {
             None = 0,
-            Position = 1 << 0,
-            Pressure = 1 << 1,
-            PenButtons = 1 << 2,
-            AuxButtons = 1 << 3,
-            Proximity = 1 << 4,
+
+            PositionX = 1 << 0,
+            PositionY = 1 << 1,
+            Pressure = 1 << 2,
+            PenButtons = 1 << 3,
+            AuxButtons = 1 << 4,
+            PenIsNearSurface = 1 << 5,
+            HoverDistance = 1 << 6,
+
+            Position = PositionX | PositionY,
         }
 
         public ValidMask ValidBits = ValidMask.None;
@@ -41,6 +46,6 @@ namespace OTDIPC.V2
         public UInt32 PenButtons = 0;
         public UInt32 AuxButtons = 0;
         public UInt32 HoverDistance = 0;
-        public bool NearPromixity = false;
+        public bool PenIsNearSurface = false;
     }
 }
