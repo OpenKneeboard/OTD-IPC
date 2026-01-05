@@ -26,19 +26,19 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="../../include/OTD-IPC/DeviceInfo.h">
+    <ClInclude Include="../../include/OTD-IPC/DeviceInfo.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="../../include/OTD-IPC/Header.h">
+    <ClInclude Include="../../include/OTD-IPC/Header.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="../../include/OTD-IPC/MessageType.h">
+    <ClInclude Include="../../include/OTD-IPC/MessageType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="../../include/OTD-IPC/State.h">
+    <ClInclude Include="../../include/OTD-IPC/State.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="../../include/OTD-IPC/DebugMessage.h">
+    <ClInclude Include="../../include/OTD-IPC/DebugMessage.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="../OTDIPC-TestClient/Transport.hpp">

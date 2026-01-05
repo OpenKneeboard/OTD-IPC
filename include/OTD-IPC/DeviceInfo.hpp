@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "Header.h"
+#include "Header.hpp"
 
 namespace OTDIPC::Messages {
 

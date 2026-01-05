@@ -1,6 +1,6 @@
 CC?=cc
 CXX?=c++
-PROTO_HEADERS:=$(wildcard ../include/OTD-IPC/*.h)
+PROTO_HEADERS:=$(wildcard ../include/OTD-IPC/*.hpp)
 
 ifneq (,$(findstring cl,$(CXX)))
     # MSVC Flags

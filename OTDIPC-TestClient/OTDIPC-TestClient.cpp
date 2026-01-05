@@ -11,10 +11,10 @@
 #include <cstring>
 #include <print>
 
-#include <OTD-IPC/DeviceInfo.h>
-#include <OTD-IPC/Ping.h>
-#include <OTD-IPC/State.h>
-#include <OTD-IPC/DebugMessage.h>
+#include <OTD-IPC/DeviceInfo.hpp>
+#include <OTD-IPC/Ping.hpp>
+#include <OTD-IPC/State.hpp>
+#include <OTD-IPC/DebugMessage.hpp>
 
 template<std::size_t N>
 static std::string_view TruncateNulls(const char (&buf)[N]) {

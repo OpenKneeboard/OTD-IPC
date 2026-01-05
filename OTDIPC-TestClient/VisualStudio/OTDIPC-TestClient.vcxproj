@@ -143,11 +143,11 @@
     <ClCompile Include="../WindowsTransport.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="../../include/OTD-IPC/DeviceInfo.h" />
-    <ClInclude Include="../../include/OTD-IPC/Header.h" />
-    <ClInclude Include="../../include/OTD-IPC/MessageType.h" />
-    <ClInclude Include="../../include/OTD-IPC/State.h" />
-    <ClInclude Include="../../include/OTD-IPC/DebugMessage.h" />
+    <ClInclude Include="../../include/OTD-IPC/DeviceInfo.hpp" />
+    <ClInclude Include="../../include/OTD-IPC/Header.hpp" />
+    <ClInclude Include="../../include/OTD-IPC/MessageType.hpp" />
+    <ClInclude Include="../../include/OTD-IPC/State.hpp" />
+    <ClInclude Include="../../include/OTD-IPC/DebugMessage.hpp" />
     <ClInclude Include="../Transport.hpp" />
     <ClInclude Include="../WindowsTransport.hpp" />
   </ItemGroup>

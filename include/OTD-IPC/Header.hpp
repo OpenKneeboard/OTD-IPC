@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "MessageType.h"
+#include "MessageType.hpp"
 
 namespace OTDIPC::Messages {
   struct Header {
