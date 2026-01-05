@@ -162,16 +162,16 @@ public class Server : ServerBase
                 PID = 0
 #pragma warning restore CS0618
             },
-            PositionValid = v2.PositionValid,
+            PositionValid = v2.ValidBits.HasFlag(V2.State.ValidMask.Position),
             X = v2.X,
             Y = v2.Y,
-            PressureValid = v2.PressureValid,
+            PressureValid = v2.ValidBits.HasFlag(V2.State.ValidMask.Pressure),
             Pressure = v2.Pressure,
-            PenButtonsValid = v2.PenButtonsValid,
+            PenButtonsValid = v2.ValidBits.HasFlag(V2.State.ValidMask.PenButtons),
             PenButtons = v2.PenButtons,
-            AuxButtonsValid = v2.AuxButtonsValid,
+            AuxButtonsValid = v2.ValidBits.HasFlag(V2.State.ValidMask.AuxButtons),
             AuxButtons = v2.AuxButtons,
-            ProximityValid = v2.ProximityValid,
+            ProximityValid = v2.ValidBits.HasFlag(V2.State.ValidMask.Proximity),
             HoverDistance = v2.HoverDistance,
             NearPromixity = v2.NearPromixity
         };

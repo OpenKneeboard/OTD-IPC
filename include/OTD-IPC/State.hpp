@@ -5,30 +5,50 @@
  */
 #pragma once
 
+#include <utility>
+
 #include "Header.hpp"
 
 namespace OTDIPC::Messages::inline V2 {
+    struct State : Header {
+        static constexpr MessageType MESSAGE_TYPE = MessageType::State;
 
-  struct State : Header {
-    static constexpr MessageType MESSAGE_TYPE = MessageType::State;
+        enum class ValidMask : uint32_t {
+            None = 0,
+            Position = 1 << 0,
+            Pressure = 1 << 1,
+            PenButtons = 1 << 2,
+            AuxButtons = 1 << 3,
+            Proximity = 1 << 4,
+        };
 
-    bool positionValid;
-    float x;
-    float y;
+        ValidMask validBits;
 
-    bool pressureValid;
-    uint32_t pressure;
+        float x;
+        float y;
 
-    bool penButtonsValid;
-    uint32_t penButtons;
+        uint32_t pressure;
+        uint32_t penButtons;
+        uint32_t auxButtons;
+        uint32_t hoverDistance;
+        bool nearProximity;
 
-    bool auxButtonsValid;
-    uint32_t auxButtons;
+        constexpr bool HasData(const ValidMask mask) const noexcept {
+            const auto underlying = std::to_underlying(mask);
+            return (underlying & std::to_underlying(validBits)) == underlying;
+        }
+    };
 
-    bool proximityValid;
-    uint32_t hoverDistance;
-    bool nearProximity;
+    constexpr State::ValidMask operator|(const State::ValidMask lhs, const State::ValidMask rhs) noexcept {
+        return static_cast<State::ValidMask>(std::to_underlying(lhs) | std::to_underlying(rhs));
+    }
 
-  };
+    constexpr State::ValidMask operator&(const State::ValidMask lhs, const State::ValidMask rhs) noexcept {
+        return static_cast<State::ValidMask>(std::to_underlying(lhs) & std::to_underlying(rhs));
+    }
+
+    constexpr State::ValidMask operator~(const State::ValidMask mask) noexcept {
+        return static_cast<State::ValidMask>(~std::to_underlying(mask));
+    }
 
 }

@@ -9,7 +9,11 @@
 #include <iostream>
 #include <format>
 #include <cstring>
+#include <ranges>
+#include <algorithm>
 #include <print>
+#include <vector>
+#include <string_view>
 
 #include <OTD-IPC/DeviceInfo.hpp>
 #include <OTD-IPC/Ping.hpp>
@@ -21,8 +25,7 @@ static std::string_view TruncateNulls(const char (&buf)[N]) {
     return std::string_view(buf, strnlen(buf, N));
 }
 
-void DumpMessage(const OTDIPC::Messages::DeviceInfo* const info)
-{
+void DumpMessage(const OTDIPC::Messages::DeviceInfo *const info) {
     std::println(
         "Device {:04x}: {}\n"
         "  Persistent ID: {}\n"
@@ -39,36 +42,55 @@ void DumpMessage(const OTDIPC::Messages::DeviceInfo* const info)
         info->maxPressure);
 }
 
-void DumpMessage(const OTDIPC::Messages::State* const state)
-{
+void DumpMessage(const OTDIPC::Messages::State *const state) {
     std::string penButtons;
     std::string auxButtons;
 
-    for (int i = 0; i < 32; ++i)
-    {
-        if (state->penButtons & (1 << i))
-        {
-            if (!penButtons.empty())
-            {
+    for (int i = 0; i < 32; ++i) {
+        if (state->penButtons & (1 << i)) {
+            if (!penButtons.empty()) {
                 penButtons += " ";
             }
             penButtons += std::to_string(i);
         }
 
-        if (state->auxButtons & (1 << i))
-        {
-            if (!auxButtons.empty())
-            {
+        if (state->auxButtons & (1 << i)) {
+            if (!auxButtons.empty()) {
                 auxButtons += " ";
             }
             auxButtons += std::to_string(i);
         }
     }
 
+    std::vector<std::string_view> bits;
+    using enum OTDIPC::Messages::State::ValidMask;
+    if (state->HasData(Position))
+        bits.emplace_back("Position");
+    if (state->HasData(Pressure))
+        bits.emplace_back("Pressure");
+    if (state->HasData(PenButtons))
+        bits.emplace_back("PenButtons");
+    if (state->HasData(AuxButtons))
+        bits.emplace_back("AuxButtons");
+    if (state->HasData(Proximity))
+        bits.emplace_back("Proximity");
+
+    // Not using `join_with` because it's not yet available on macOS
+    const auto bitsStr = std::ranges::fold_left(
+        bits
+        | std::views::enumerate
+        | std::views::transform([](auto &&pair) {
+            auto [i, bit] = pair;
+            return (i == 0) ? std::string{bit} : std::format(" | {}", bit);
+        }),
+        std::string{},
+        std::plus<>{});
+
     std::println(
         "{:04x} -> ({}, {}, {}) {} (near: {})\n"
         "  Pen: {}\n"
-        "  Aux: {}",
+        "  Aux: {}\n"
+        "  Valid: {}",
         state->nonPersistentTabletId,
         state->x,
         state->y,
@@ -76,24 +98,21 @@ void DumpMessage(const OTDIPC::Messages::State* const state)
         state->pressure,
         state->nearProximity,
         penButtons,
-        auxButtons);
+        auxButtons,
+        bitsStr);
 }
 
-void DumpMessage(const OTDIPC::Messages::Ping* const msg)
-{
+void DumpMessage(const OTDIPC::Messages::Ping *const msg) {
     std::println("Ping {:#016x}", msg->sequenceNumber);
 }
 
-void DumpMessage(const OTDIPC::Messages::DebugMessage* const msg)
-{
+void DumpMessage(const OTDIPC::Messages::DebugMessage *const msg) {
     std::println("{}", msg->message());
 }
 
-template <class T>
-void DumpMessage(const OTDIPC::Messages::Header* const header)
-{
-    if (header->size < sizeof(T))
-    {
+template<class T>
+void DumpMessage(const OTDIPC::Messages::Header *const header) {
+    if (header->size < sizeof(T)) {
         std::cerr << std::format(
             "Received message type {} of invalid size {} - expected {}",
             static_cast<std::underlying_type_t<const OTDIPC::Messages::MessageType>>(header->messageType),
@@ -101,15 +120,13 @@ void DumpMessage(const OTDIPC::Messages::Header* const header)
             sizeof(T)) << std::endl;
         return;
     }
-    DumpMessage(reinterpret_cast<const T* const>(header));
+    DumpMessage(reinterpret_cast<const T * const>(header));
 }
 
-int main()
-{
+int main() {
     std::setvbuf(stdout, nullptr, _IONBF, 0);
     const auto connection = Transport::Open();
-    if (!connection)
-    {
+    if (!connection) {
         std::cerr << connection.error() << std::endl;
         return 1;
     }
@@ -118,54 +135,48 @@ int main()
     using namespace OTDIPC::Messages;
     static_assert(sizeof(buffer) >= sizeof(DeviceInfo));
     static_assert(sizeof(buffer) >= sizeof(State));
-    const auto header = reinterpret_cast<const Header* const>(buffer);
+    const auto header = reinterpret_cast<const Header * const>(buffer);
 
     while (true) {
         const auto result = (*connection)->Read(buffer, sizeof(Header));
-        if (!result)
-        {
+        if (!result) {
             std::cerr << result.error() << std::endl;
             return 1;
         }
-        if (const auto bytesRead = result.value(); bytesRead != sizeof(Header))
-        {
+        if (const auto bytesRead = result.value(); bytesRead != sizeof(Header)) {
             std::cerr << std::format("Read {} bytes instead of {} bytes", bytesRead, sizeof(Header)) << std::endl;
             return 1;
         }
 
-        if (header->size < sizeof(Header))
-        {
+        if (header->size < sizeof(Header)) {
             std::cerr << std::format("header->size ({}) < sizeof(Header) ({})", header->size, sizeof(Header)) <<
-                std::endl;
+                    std::endl;
             return 1;
         }
-        if (header->size > sizeof(buffer))
-        {
+        if (header->size > sizeof(buffer)) {
             std::cerr << std::format("header->size ({}) < sizeof(Buffer) ({})", header->size, sizeof(buffer)) <<
-                std::endl;
+                    std::endl;
             return 1;
         }
         const auto bytesToRead = header->size - sizeof(Header);
-        if (const auto bodyResult = (*connection)->Read(buffer + sizeof(Header), bytesToRead); !bodyResult)
-        {
+        if (const auto bodyResult = (*connection)->Read(buffer + sizeof(Header), bytesToRead); !bodyResult) {
             std::cerr << std::format("Failed to read after header: {}", bodyResult.error()) << std::endl;
             return 1;
         }
 
-        switch (header->messageType)
-        {
-        case MessageType::DeviceInfo:
-            DumpMessage<DeviceInfo>(header);
-            break;
-        case MessageType::State:
-            DumpMessage<State>(header);
-            break;
-        case MessageType::Ping:
-            DumpMessage<Ping>(header);
-            break;
-        case MessageType::DebugMessage:
-            DumpMessage<DebugMessage>(header);
-            break;
+        switch (header->messageType) {
+            case MessageType::DeviceInfo:
+                DumpMessage<DeviceInfo>(header);
+                break;
+            case MessageType::State:
+                DumpMessage<State>(header);
+                break;
+            case MessageType::Ping:
+                DumpMessage<Ping>(header);
+                break;
+            case MessageType::DebugMessage:
+                DumpMessage<DebugMessage>(header);
+                break;
         }
     }
 }
