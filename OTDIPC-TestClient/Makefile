@@ -1,4 +1,3 @@
-CC?=cc
 CXX?=c++
 PROTO_HEADERS:=$(wildcard ../include/OTD-IPC/*.hpp)
 

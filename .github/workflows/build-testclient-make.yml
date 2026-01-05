@@ -11,4 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build with make
-        run: make -C OTDIPC-TestClient
+        shell: sh
+        run: |
+          if [ -x /usr/bin/g++-14 ]; then
+            export CXX=/usr/bin/g++-14
+          fi
+          make -C OTDIPC-TestClient
