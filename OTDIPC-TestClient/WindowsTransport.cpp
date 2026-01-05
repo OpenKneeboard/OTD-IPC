@@ -8,8 +8,9 @@
 
 #include "Shlobj.h"
 
-#pragma comment(lib, "Ws2_32.lib")
+#pragma comment(lib, "Ole32.lib")
 #pragma comment(lib, "Shell32.lib")
+#pragma comment(lib, "Ws2_32.lib")
 
 namespace
 {
