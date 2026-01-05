@@ -69,8 +69,8 @@ std::expected<std::unique_ptr<Transport>, std::string> DarwinTransport::Open() n
         return std::unexpected{fd.error()};
     }
 
-    std::println("Connected to unix domain socket: {}", pathString);
-    return std::unique_ptr<DarwinTransport>{new DarwinTransport(std::move(fd))};
+    std::println("Connected to unix domain socket: {}", path->string());
+    return std::unique_ptr<DarwinTransport>{new DarwinTransport(*std::move(fd))};
 }
 
 std::expected<size_t, std::string> DarwinTransport::Read(void* buffer, const size_t bufferSize) noexcept
