@@ -19,12 +19,17 @@ namespace
 {
     std::expected<std::filesystem::path, std::string> GetApplicationSupportPath() noexcept
     {
-        if (getenv("XDG_DATA_HOME"))
+        if (const auto dataDir = getenv("XDG_DATA_HOME"))
         {
-            return std::filesystem::path { getenv("XDG_DATA_HOME") };
+            return dataDir;
         }
 
-        return std::filesystem::path{getenv("HOME")} / ".local" / "share";
+        auto home = getenv("HOME");
+        if (!home) {
+            home = getpwuid(getuid())->pw_dir;
+        }
+
+        return std::filesystem::path{home} / ".local" / "share";
     }
 }
 
