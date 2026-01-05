@@ -5,6 +5,7 @@
  */
 
 using System.Reflection;
+using System.Runtime.InteropServices;
 using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Tablet;
@@ -30,11 +31,14 @@ namespace OTDIPC
 
         public OTDIPC()
         {
-            _servers = new IServer[]
+            var servers = new List<IServer> { new V2.Server(this) };
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                new V2.Server(this),
-                new V1.Server(this)
-            };
+                servers.Add(new V1.Server(this));
+            }
+
+            _servers = servers.ToArray();
         }
 
         public void Consume(IDeviceReport deviceReport)
