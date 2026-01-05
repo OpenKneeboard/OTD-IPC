@@ -109,8 +109,10 @@ Sent when a client connects (if device present) or when the tablet device change
 - `maxPressure` (uint32): Maximum pressure value
 - `vendorId` (uint16): USB Vendor ID *(deprecated, use persistentId)*
 - `productId` (uint16): USB Product ID *(deprecated, use persistentId)*
-- `persistentId` (char[256]): Unique device identifier string (null-terminated UTF-8)
-- `name` (char[256]): Human-readable device name (null-terminated UTF-8)
+- `persistentId` (char[256]): Unique device identifier string (UTF-8)
+    - this will be null-terminated if the string is shorter than 256 bytes
+- `name` (char[256]): Human-readable device name (UTF-8)
+    - this will be null-terminated if the string is shorter than 256 bytes
 
 #### State (ID: 2)
 
@@ -273,6 +275,7 @@ SOCKET=/home/user/.local/share/otd-ipc/sock
 
 - Servers SHOULD clean up their metadata file on clean shutdown
 - Clients SHOULD handle stale files gracefully
+- Clients MUST handle strings that completely fill fixed-sized buffers gracefully; these strings only have a terminating null if they are shorter than the buffer size
 - Servers SHOULD delete existing socket files before binding (Unix requirement)
 - Clients SHOULD verify the socket is connectable before assuming a server is available
 - Clients SHOULD attempt to use the default implementation, unless otherwise specified
