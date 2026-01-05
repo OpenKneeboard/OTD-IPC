@@ -7,9 +7,11 @@
 using OpenTabletDriver.Plugin;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace OTDIPC.V1;
 
+[SupportedOSPlatform("windows")]
 public class Server : ServerBase
 {
     private const string MyImplementationId = "otd-ipc.openkneeboard.com";

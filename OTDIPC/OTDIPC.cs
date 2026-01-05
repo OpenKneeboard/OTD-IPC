@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-using System.Reflection;
-using System.Runtime.InteropServices;
 using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Tablet;
@@ -31,7 +29,7 @@ namespace OTDIPC
 
         public OTDIPC()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (OperatingSystem.IsWindows())
             {
                 _servers = new IServer[]
                 {
