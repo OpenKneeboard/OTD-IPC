@@ -365,3 +365,6 @@ FodyWeavers.xsd
 ./out/
 .idea/
 OTDIPC-TestClient/otd-ipc-test-client
+*.exe
+*.pdb
+*.dll
