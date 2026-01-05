@@ -38,13 +38,13 @@ A C++20 [example client](OTDIPC-TestClient/OTDIPC-TestClient.cpp) is included.
 
 ### Data types
 
-| Type | C++ | C# |
-|------|-----|----|
-| `enum MessageType` | [.h](include/OTD-IPC/MessageType.h) | [.cs](OTDIPC/MessageType.cs) |
-| `struct Header` | [.h](include/OTD-IPC/Header.h) | [.cs](OTDIPC/Header.cs) |
-| ✉️ `struct DeviceInfo` | [.h](include/OTD-IPC/DeviceInfo.h) | [.cs](OTDIPC/DeviceInfo.cs) |
-| ✉️ `struct Ping` | [.h](include/OTD-IPC/Ping.h) | [.cs](OTDIPC/Ping.cs) |
-| ✉️ `struct State` | [.h](include/OTD-IPC/State.h) | [.cs](OTDIPC/State.cs) |
+| Type | C++                                     | C#                              |
+|------|-----------------------------------------|---------------------------------|
+| `enum MessageType` | [.hpp](include/OTD-IPC/MessageType.hpp) | [.cs](OTDIPC/V2/MessageType.cs) |
+| `struct Header` | [.hpp](include/OTD-IPC/Header.hpp)      | [.cs](OTDIPC/V2/Header.cs)      |
+| ✉️ `struct DeviceInfo` | [.hpp](include/OTD-IPC/DeviceInfo.hpp)  | [.cs](OTDIPC/V2/DeviceInfo.cs)  |
+| ✉️ `struct Ping` | [.hpp](include/OTD-IPC/Ping.hpp)        | [.cs](OTDIPC/V2/Ping.cs)        |
+| ✉️ `struct State` | [.hpp](include/OTD-IPC/State.hpp)       | [.cs](OTDIPC/V2/State.cs)       |
 
 ## License
 
