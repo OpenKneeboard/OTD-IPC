@@ -19,7 +19,7 @@ all: otd-ipc-test-client
 
 proto-headers: $(PROTO_HEADERS)
 
-otd-ipc-test-client: OTDIPC-TestClient.cpp Transport.cpp Transport.h ${PLATFORM}Transport.h ${PLATFORM}Transport.cpp $(PROTO_HEADERS) ${PLATFORM_SOURCES}
+otd-ipc-test-client: OTDIPC-TestClient.cpp Transport.cpp Transport.hpp ${PLATFORM}Transport.hpp ${PLATFORM}Transport.cpp $(PROTO_HEADERS) ${PLATFORM_SOURCES}
 	"${CXX}" ${CXX_OUT_FLAGS} ${REQUIRED_CXX_FLAGS} -I ../include OTDIPC-TestClient.cpp Transport.cpp ${PLATFORM}Transport.cpp ${PLATFORM_SOURCES}
 
 clean:

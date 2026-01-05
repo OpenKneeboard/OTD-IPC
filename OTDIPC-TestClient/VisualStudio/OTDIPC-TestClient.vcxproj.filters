@@ -41,10 +41,10 @@
     <ClInclude Include="../../include/OTD-IPC/DebugMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="../OTDIPC-TestClient/Transport.h">
+    <ClInclude Include="../OTDIPC-TestClient/Transport.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="../OTDIPC-TestClient/WindowsTransport.h">
+    <ClInclude Include="../OTDIPC-TestClient/WindowsTransport.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
