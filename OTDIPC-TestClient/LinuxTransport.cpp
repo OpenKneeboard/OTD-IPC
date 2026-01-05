@@ -21,7 +21,7 @@ namespace
     {
         if (getenv("XDG_DATA_HOME"))
         {
-            return std::filesystem::path { getenv("XDG_DATA_HOME") }
+            return std::filesystem::path { getenv("XDG_DATA_HOME") };
         }
 
         return std::filesystem::path{getenv("HOME")} / ".local" / "share";
