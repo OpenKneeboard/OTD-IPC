@@ -273,6 +273,11 @@ SOCKET=/home/user/.local/share/otd-ipc/sock
 
 ### Implementation Notes
 
+- Servers MUST NOT replace an existing `default.txt` on regular startup
+- Servers MAY notify the user that they are not default, and provide an opt-in path
+- Servers MUST NOT persist an opt-in choice to replace the default
+- Servers MAY replace an existing `default.txt` on installation, as long as 'installation' is not considered part of regular startup
+
 - Servers SHOULD clean up their metadata file on clean shutdown
 - Clients SHOULD handle stale files gracefully
 - Clients MUST handle strings that completely fill fixed-sized buffers gracefully; these strings only have a terminating null if they are shorter than the buffer size
