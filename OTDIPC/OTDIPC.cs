@@ -26,17 +26,20 @@ namespace OTDIPC
 
         private static UInt32 _nextNonPersistentTabletId = 1;
 
-
-        private readonly Server _server;
+        private readonly IServer[] _servers;
 
         public OTDIPC()
         {
-            _server = new Server(this);
+            _servers = new IServer[]
+            {
+                new V2.Server(this),
+                new V1.Server(this)
+            };
         }
 
         public void Consume(IDeviceReport deviceReport)
         {
-            if (!_server.HaveClient)
+            if (!_servers.Any(s => s.HaveClient))
             {
                 Emit?.Invoke(deviceReport);
                 return;

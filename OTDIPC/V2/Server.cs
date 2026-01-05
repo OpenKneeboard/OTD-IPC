@@ -17,7 +17,7 @@ using System.Text;
 
 namespace OTDIPC.V2;
 
-public class Server : IDisposable
+public class Server : ServerBase
 {
     private const string MyImplementationId = "otd-ipc.openkneeboard.com";
 
@@ -26,40 +26,23 @@ public class Server : IDisposable
     Ping _ping = new();
     Socket? _connection;
     Socket? _listener;
-    IDriver _driver;
-    Timer? _timer;
-    bool _waitingForConnection;
-    bool _connected;
     DeviceInfo? _deviceInfo;
     private readonly string _socketPath = GetSocketPath();
 
-    public bool HaveClient => _connected;
-
-    public Server(IDriver driver)
+    public Server(IDriver driver) : base(driver)
     {
-        _driver = driver;
         _deviceInfo = driver.DeviceInfo;
-        _timer = new((_) => { this.Ping(); }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
-
-        driver.TabletChanged += Driver_TabletChanged;
-        driver.StateChanged += Driver_StateChanged;
     }
 
-
-    public void Dispose()
+    protected override void Driver_StateChanged(object? sender, State state)
     {
-        _timer?.Dispose();
-        _driver.TabletChanged -= Driver_TabletChanged;
-        _driver.StateChanged -= Driver_StateChanged;
-    }
-
-    void Driver_StateChanged(object? sender, State state)
-    {
+        System.Diagnostics.Debug.Assert(!RuntimeHelpers.IsReferenceOrContainsReferences<State>(), "V2.State must be unmanaged");
         this.SendMessage(state);
     }
 
-    void Driver_TabletChanged(object? sender, DeviceInfo info)
+    protected override void Driver_TabletChanged(object? sender, DeviceInfo info)
     {
+        System.Diagnostics.Debug.Assert(!RuntimeHelpers.IsReferenceOrContainsReferences<DeviceInfo>(), "V2.DeviceInfo must be unmanaged");
         _deviceInfo = info;
         this.SendMessage(info);
     }
@@ -72,51 +55,12 @@ public class Server : IDisposable
             MessageType = V2.MessageType.DebugMessage,
             Size = (UInt32)(Marshal.SizeOf<V2.Header>() + bytes.Length),
         };
+        System.Diagnostics.Debug.Assert(!RuntimeHelpers.IsReferenceOrContainsReferences<Header>(), "V2.Header must be unmanaged");
         SendMessage(header);
         WriteBytes(bytes);
     }
 
-    void SendMessage<T>(T message) where T : unmanaged
-    {
-        if (_connection == null)
-        {
-            RunServerAsync();
-            return;
-        }
-
-        IntPtr ptr = IntPtr.Zero;
-        try
-        {
-            Span<byte> bytes = stackalloc byte[Unsafe.SizeOf<T>()];
-            MemoryMarshal.Write(bytes, ref message);
-            WriteBytes(bytes);
-        }
-        catch (TimeoutException)
-        {
-            OnFailedWrite();
-        }
-        catch (IOException)
-        {
-            OnFailedWrite();
-        }
-        catch (SocketException)
-        {
-            OnFailedWrite();
-        }
-        catch (ObjectDisposedException)
-        {
-            // If we think the client's hung, we can close the connection
-            // while a write is in progress; this is especially common
-            // for ping writes.
-            OnFailedWrite();
-        }
-        finally
-        {
-            Marshal.FreeCoTaskMem(ptr);
-        }
-    }
-
-    void WriteBytes(ReadOnlySpan<byte> bytes)
+    protected override void WriteBytes(ReadOnlySpan<byte> bytes)
     {
         if (_connection == null)
         {
@@ -137,7 +81,7 @@ public class Server : IDisposable
         }
     }
 
-    void OnFailedWrite()
+    protected override void OnFailedWrite()
     {
         if (!_connected)
         {
@@ -158,7 +102,7 @@ public class Server : IDisposable
         RunServerAsync();
     }
 
-    async Task RunServerAsync()
+    protected override async void RunServerAsync()
     {
         if (_waitingForConnection)
         {
@@ -229,7 +173,7 @@ public class Server : IDisposable
         this.SendMessage(_deviceInfo.Value);
     }
 
-    void Ping()
+    protected override void Ping()
     {
         if (_waitingForConnection)
         {
@@ -237,6 +181,7 @@ public class Server : IDisposable
         }
 
         _ping.SequenceNumber++;
+        System.Diagnostics.Debug.Assert(!RuntimeHelpers.IsReferenceOrContainsReferences<Ping>(), "V2.Ping must be unmanaged");
         SendMessage(_ping);
     }
 
