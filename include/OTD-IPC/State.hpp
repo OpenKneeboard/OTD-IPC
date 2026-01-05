@@ -9,7 +9,7 @@
 
 #include "Header.hpp"
 
-namespace OTDIPC::Messages::inline V2 {
+namespace OTDIPC::inline V2::Messages {
     struct State : Header {
         static constexpr MessageType MESSAGE_TYPE = MessageType::State;
 

@@ -1,19 +1,18 @@
 /*
  * Copyright (c) 2022 Fred Emmott <fred@fredemmott.com>
  *
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: ISC
  */
 #pragma once
 
 #include <cinttypes>
 
-namespace OTDIPC::inline V2::Messages {
+namespace OTDIPC::V1::Messages {
 
   enum class MessageType : uint32_t {
     DeviceInfo = 1,
     State = 2,
     Ping = 3,
-    DebugMessage = 4,
   };
 
 }
