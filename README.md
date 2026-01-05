@@ -4,7 +4,7 @@ This is a filter plugin for [OpenTabletDriver], allowing 1 program at a time to 
 
 It is primarily intended for use with [OpenKneeboard], but OpenKneeboard is not required.
 
-Currently released versions are only usable on Windows. `master` is also usable on macOS, though is a volatile work in progress; it should be relatively straightforward to also make `master` also work on Linux.
+Currently released versions are only usable on Windows. `master` is also usable on macOS and Linux, though is a work in progress.
 
 ## Getting Started
 
@@ -18,33 +18,7 @@ Support may be available from the community via [Discord].
 
 ## Protocol
 
-In the current Windows-only version, communication is over a named pipe in message mode. The named pipe is called:
-- `"com.fredemmott.openkneeboard.OTDIPC/v0.1"` in .Net named pipe APIs
-- `"\\.\pipe\com.fredemmott.openkneeboard.OTDIPC/v0.1"` when using `CreateFile()` or similar APIs, e.g. in C++
-
-In `master`, communication is over a Unix socket with a varying path, to allow multiple server implementations. Socket paths can be [discovered](https://github.com/OpenKneeboard/OTD-IPC/issues/18#issuecomment-3542327853).
-
-One client is supported at a time - this is intended to be an exclusive mode.
-
-Messages are defined as structs, and every message stars with a header containing the message type and size.
-
-Implementations SHOULD verify that the message size is the same as the size in the header, and that the size is AT LEAST as large as the expected size of the struct. The server MAY send extended messages which are larger than expected.
-
-If a device is connected, the server will send a `DeviceInfo` message when a client connects to the named pipe.
-
-If state is available, the server will send a `State` message when a client connects to the named pipe.
-
-A C++20 [example client](OTDIPC-TestClient/OTDIPC-TestClient.cpp) is included.
-
-### Data types
-
-| Type | C++                                     | C#                              |
-|------|-----------------------------------------|---------------------------------|
-| `enum MessageType` | [.hpp](include/OTD-IPC/MessageType.hpp) | [.cs](OTDIPC/V2/MessageType.cs) |
-| `struct Header` | [.hpp](include/OTD-IPC/Header.hpp)      | [.cs](OTDIPC/V2/Header.cs)      |
-| ✉️ `struct DeviceInfo` | [.hpp](include/OTD-IPC/DeviceInfo.hpp)  | [.cs](OTDIPC/V2/DeviceInfo.cs)  |
-| ✉️ `struct Ping` | [.hpp](include/OTD-IPC/Ping.hpp)        | [.cs](OTDIPC/V2/Ping.cs)        |
-| ✉️ `struct State` | [.hpp](include/OTD-IPC/State.hpp)       | [.cs](OTDIPC/V2/State.cs)       |
+See [docs/protocol.md](docs/protocol.md).
 
 ## License
 
