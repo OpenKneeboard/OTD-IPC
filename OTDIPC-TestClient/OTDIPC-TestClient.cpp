@@ -78,12 +78,11 @@ void DumpMessage(const OTDIPC::Messages::State *const state) {
     // Not using `join_with` because it's not yet available on macOS
     const auto bitsStr = std::ranges::fold_left(
         bits
-        | std::views::enumerate
-        | std::views::transform([](auto &&pair) {
-            auto [i, bit] = pair;
-            return (i == 0) ? std::string{bit} : std::format(" | {}", bit);
+        | std::views::drop(1)
+        | std::views::transform([](auto &&bit) {
+            return std::format(" | {}", bit);
         }),
-        std::string{},
+        std::string{bits.empty() ? std::string_view {} : bits.front()},
         std::plus<>{});
 
     std::println(
