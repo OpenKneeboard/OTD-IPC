@@ -7,7 +7,7 @@
 
 #include "MessageType.hpp"
 
-namespace OTDIPC::Messages {
+namespace OTDIPC::Messages::inline V2 {
   struct Header {
     MessageType messageType;
     uint32_t size;

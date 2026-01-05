@@ -7,7 +7,7 @@
 
 #include "Header.hpp"
 
-namespace OTDIPC::Messages {
+namespace OTDIPC::Messages::inline V2 {
 
 	struct Ping : Header {
 		static constexpr MessageType MESSAGE_TYPE = MessageType::Ping;

@@ -9,7 +9,7 @@
 
 #include <string_view>
 
-namespace OTDIPC::Messages {
+namespace OTDIPC::Messages::inline V2 {
 	struct DebugMessage {
 		static constexpr MessageType MESSAGE_TYPE = MessageType::DebugMessage;
 

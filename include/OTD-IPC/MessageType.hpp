@@ -7,7 +7,7 @@
 
 #include <cinttypes>
 
-namespace OTDIPC::Messages {
+namespace OTDIPC::Messages::inline V2 {
 
   enum class MessageType : uint32_t {
     DeviceInfo = 1,
