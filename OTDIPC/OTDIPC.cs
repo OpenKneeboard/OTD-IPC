@@ -31,14 +31,21 @@ namespace OTDIPC
 
         public OTDIPC()
         {
-            var servers = new List<IServer> { new V2.Server(this) };
-
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                servers.Add(new V1.Server(this));
+                _servers = new IServer[]
+                {
+                    new V1.Server(this),
+                    new V2.Server(this),
+                };
             }
-
-            _servers = servers.ToArray();
+            else
+            {
+                _servers = new IServer[]
+                {
+                    new V2.Server(this),
+                };
+            }
         }
 
         public void Consume(IDeviceReport deviceReport)
