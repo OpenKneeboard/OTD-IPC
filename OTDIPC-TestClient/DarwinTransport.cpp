@@ -8,12 +8,12 @@
 #include <string>
 
 #include <pwd.h>
-#include <sys/socket.h>
 #include <sys/un.h>
-#include <unistd.h>
 #include <cerrno>
 #include <sysdir.h>
 #include <wordexp.h>
+
+#include "PosixSocket.hpp"
 
 namespace
 {
@@ -64,30 +64,9 @@ std::expected<std::unique_ptr<Transport>, std::string> DarwinTransport::Open() n
         return std::unexpected{path.error()};
     }
 
-    if (!exists(*path))
-    {
-        return std::unexpected{std::format("Socket `{}` does not exist", path->string())};
-    }
-
-    unique_fd fd{::socket(AF_UNIX, SOCK_STREAM, 0)};
-    if (!fd.valid())
-    {
-        return std::unexpected{std::format("socket(AF_UNIX) failed: {}", std::strerror(errno))};
-    }
-
-    sockaddr_un addr{};
-    addr.sun_family = AF_UNIX;
-    const auto pathString = path->string();
-    if (pathString.size() >= sizeof(addr.sun_path))
-    {
-        return std::unexpected{std::format("Socket path too long ({} >= {})", pathString.size(), sizeof(addr.sun_path))};
-    }
-    std::strncpy(addr.sun_path, pathString.c_str(), sizeof(addr.sun_path) - 1);
-
-    const socklen_t addrlen = static_cast<socklen_t>(offsetof(sockaddr_un, sun_path) + std::strlen(addr.sun_path) + 1);
-    if (::connect(fd.get(), reinterpret_cast<const sockaddr*>(&addr), addrlen) != 0)
-    {
-        return std::unexpected{std::format("connect('{}') failed: {}", pathString, std::strerror(errno))};
+    auto fd = PosixSocket::ConnectToUnixSocket(*path);
+    if (!fd) {
+        return std::unexpected{fd.error()};
     }
 
     std::println("Connected to unix domain socket: {}", pathString);
@@ -96,28 +75,7 @@ std::expected<std::unique_ptr<Transport>, std::string> DarwinTransport::Open() n
 
 std::expected<size_t, std::string> DarwinTransport::Read(void* buffer, const size_t bufferSize) noexcept
 {
-    if (!mFD.valid())
-    {
-        return std::unexpected{"Socket is not connected"};
-    }
-    size_t total = 0;
-    char* out = static_cast<char*>(buffer);
-    while (total < bufferSize)
-    {
-        const size_t toRead = bufferSize - total;
-        const ssize_t ret = ::read(mFD.get(), out + total, toRead);
-        if (ret < 0)
-        {
-            if (errno == EINTR) { continue; }
-            return std::unexpected{std::format("read failed: {}", std::strerror(errno))};
-        }
-        if (ret == 0)
-        {
-            return std::unexpected{"socket closed by peer"};
-        }
-        total += static_cast<size_t>(ret);
-    }
-    return total;
+    return PosixSocket::Read(*mFD, buffer, bufferSize);
 }
 
 DarwinTransport::DarwinTransport(unique_fd fd) noexcept : mFD(std::move(fd))

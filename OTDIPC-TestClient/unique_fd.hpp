@@ -43,7 +43,10 @@ public:
         mFD = fd;
     }
 
-    operator int() const noexcept { return mFD; }
+    [[nodiscard]]
+    int operator*() const noexcept {
+        return get();
+    }
     operator bool() const noexcept { return valid(); }
 
 private:

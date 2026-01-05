@@ -15,7 +15,7 @@ class LinuxTransport final : public Transport
 {
 public:
     LinuxTransport() = delete;
-    ~LinuxTransport() override;
+    ~LinuxTransport() final;
 
     static std::expected<std::unique_ptr<Transport>, std::string> Open() noexcept;
     std::expected<size_t, std::string> Read(void *buffer, size_t bufferSize) noexcept override;
