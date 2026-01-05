@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 namespace OTDIPC.V2
 {
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
-    struct Header
+    public struct Header
     {
         public MessageType MessageType;
         public UInt32 Size;

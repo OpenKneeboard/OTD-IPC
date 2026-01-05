@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace OTDIPC.V2
 {
-    enum MessageType : UInt32
+    public enum MessageType : UInt32
     {
         DeviceInfo = 1,
         State = 2,

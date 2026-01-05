@@ -10,7 +10,7 @@ using System.Text;
 namespace OTDIPC.V2
 {
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
-    unsafe struct DeviceInfo
+    public unsafe struct DeviceInfo
     {
         public DeviceInfo()
         {

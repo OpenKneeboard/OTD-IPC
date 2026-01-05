@@ -8,45 +8,30 @@ using System.Reflection;
 using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Tablet;
+using OTDIPC.V2;
 
 namespace OTDIPC
 {
     [PluginName("OpenKneeboard (OTD-IPC)")]
-    public class OTDIPC : IPositionedPipelineElement<IDeviceReport>
+    public class OTDIPC : IPositionedPipelineElement<IDeviceReport>, IDriver
     {
-        V2.State _state = new();
-        V2.DeviceInfo _deviceInfo = new();
-        private readonly string _implementationIdDebugMessage = GenerateImplementationIdDebugMessage();
+        State _state = new();
+        private DeviceInfo? _deviceInfo;
+
+        DeviceInfo? IDriver.DeviceInfo => _deviceInfo;
+
+        public event EventHandler<DeviceInfo>? TabletChanged;
+        public event EventHandler<State>? StateChanged;
+
+
         private static UInt32 _nextNonPersistentTabletId = 1;
 
-        static Server _server = new();
-        Action? _clientConnectedHandler;
+
+        private readonly Server _server;
 
         public OTDIPC()
         {
-            WeakReference<OTDIPC> weakThis = new(this);
-            _clientConnectedHandler = () =>
-            {
-                OTDIPC? self;
-                if (weakThis.TryGetTarget(out self))
-                {
-                    self?.OnClientConnected();
-                }
-            };
-            _server.ClientConnected += _clientConnectedHandler;
-        }
-
-        ~OTDIPC()
-        {
-            _server.ClientConnected -= _clientConnectedHandler;
-        }
-
-        void OnClientConnected()
-        {
-            System.Diagnostics.Debug.WriteLine("Sending hello");
-            _server.SendDebugMessage(_implementationIdDebugMessage);
-            System.Diagnostics.Debug.WriteLine("Sending device info");
-            _server.SendMessage(_deviceInfo);
+            _server = new Server(this);
         }
 
         public void Consume(IDeviceReport deviceReport)
@@ -115,17 +100,12 @@ namespace OTDIPC
                 _state.AuxButtonsValid = true;
             }
 
-            if (!_deviceInfo.IsValid)
-            {
-                return;
-            }
-
             if (!changed)
             {
                 return;
             }
 
-            _server.SendMessage(_state);
+            StateChanged?.Invoke(this, _state);
         }
 
         public event Action<IDeviceReport>? Emit;
@@ -144,42 +124,38 @@ namespace OTDIPC
             set
             {
                 _tablet = value;
-                _deviceInfo = new();
-                _deviceInfo.Name = _tablet.Properties.Name;
                 var specs = _tablet.Properties.Specifications.Digitizer;
-                _deviceInfo.MaxX = specs.MaxX;
-                _deviceInfo.MaxY = specs.MaxY;
-                _deviceInfo.MaxPressure = _tablet.Properties.Specifications.Pen.MaxPressure;
-                _deviceInfo.IsValid = true;
+                var info = new DeviceInfo
+                {
+                    IsValid = true,
+                    Name = _tablet.Properties.Name,
+                    MaxX = specs.MaxX,
+                    MaxY = specs.MaxY,
+                    MaxPressure = _tablet.Properties.Specifications.Pen.MaxPressure,
+                };
 
                 var id = _tablet.Identifiers.First();
                 if (id != null)
                 {
-                    var vendorId = (UInt16) id.VendorID;
+                    var vendorId = (UInt16)id.VendorID;
                     var productId = (UInt16)id.ProductID;
-                    _deviceInfo.PersistentId =
+                    info.PersistentId =
                         $"otd-ipc.openkneeboard.com/vid-pid/{vendorId:X4}-{productId:X4}";
                     // Marked obsolete, but we still want to populate them for existing clients
 #pragma warning disable CS0618
-                    _deviceInfo.VendorId = vendorId;
-                    _deviceInfo.ProductId = productId;
+                    info.VendorId = vendorId;
+                    info.ProductId = productId;
 #pragma warning restore CS0618
                 }
 
-                _deviceInfo.Header.NonPersistentTabletId = _nextNonPersistentTabletId++;
+                info.Header.NonPersistentTabletId = _nextNonPersistentTabletId++;
 
                 _state = new();
-                _state.Header.NonPersistentTabletId = _deviceInfo.Header.NonPersistentTabletId;
+                _state.Header.NonPersistentTabletId = info.Header.NonPersistentTabletId;
+                _deviceInfo = info;
 
-                _server.SendMessage(_deviceInfo);
+                TabletChanged?.Invoke(this, info);
             }
-        }
-
-        private static string GenerateImplementationIdDebugMessage()
-        {
-            var self = Assembly.GetExecutingAssembly().GetName();
-            var otd = Assembly.GetEntryAssembly()?.GetName();
-            return $"OTD-IPC: `{self.Name}` v{self.Version} running on `{otd?.Name}` v{otd?.Version}";
         }
     }
 }
