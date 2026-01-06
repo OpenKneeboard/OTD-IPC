@@ -1,6 +1,6 @@
 # OTD-IPC Protocol Documentation
 
-**Version:** v2.20260105.03
+**Version:** v2.20260106.01
 **Status:** Draft
 
 This document describes the V2 protocol used for communication between OpenTabletDriver and client applications.
@@ -128,12 +128,17 @@ Sent whenever tablet state changes. Contains position, pressure, button, and pro
 - `x` (float): Horizontal distance from left edge in device units
 - `y` (float): Vertical distance from top edge in device units
 - `pressure` (uint32): Pen pressure
-- `penButtons` (uint32): Pen button state (bitmask, bit N = button N)
+- `penButtons` (uint32): Pen button state (bitmask, bit N = button N). Button 0 (LSB) is reserved for the pen tip
 - `auxButtons` (uint32): Auxiliary button state (bitmask, bit N = button N)
 - `hoverDistance` (uint32): Distance above surface in device-specific units
 - `penIsNearSurface` (bool): Whether pen is in proximity of tablet surface
 
-*(0, 0)* is the top left corner; coordinates increase to the right and down.
+Notes:
+
+- *(0, 0)* is the top left corner; coordinates increase to the right and down.
+- button 0 MUST be set if the pen is in contact with the surface
+- button 0 MUST NOT be set if the pen is not in contact surface
+- if there is no actual pen tip button, the server MUST synthesize button 0 from pressure data, and bit-shift the other buttons (if any) along
 
 **ValidMask values:**
 
