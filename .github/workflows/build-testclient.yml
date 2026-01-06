@@ -1,0 +1,24 @@
+﻿name: Build Test Client
+on: [push, pull_request]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-26, ubuntu-24.04, windows-2022]
+    name: Build Test Client (${{matrix.os}})
+    runs-on: ${{matrix.os}}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        shell: pwsh
+        working-directory: OTDIPC-TestClient
+        run: |
+          $ExtraArgs = @()
+          if (Test-Path "/usr/bin/g++-14") {
+            $ExtraArgs += "-DCMAKE_CXX_COMPILER=/usr/bin/g++-14"
+          }
+          cmake -B build $ExtraArgs
+      - name: Build
+        working-directory: OTDIPC-TestClient/build
+        run: cmake --build . --parallel
