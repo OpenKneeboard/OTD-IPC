@@ -21,6 +21,11 @@ Communication uses Unix domain sockets on all platforms (Windows, macOS, Linux).
 - **Server-Initiated Messages:** The server pushes state updates to the client as they occur
 - **Persistent Connection:** Client maintains a long-lived connection to receive continuous updates
 
+This is primarily intended for exclusive access while gaming; as such, while in-use, servers SHOULD:
+
+- expose the full tablet area, ignoring any active area clipping or monitor mapping, unless the user has explicitly indicated they want this to affect OTD-IPC
+- expose all buttons, suppressing their usual behavior, unless the user has explicitly indicated they want to use their usual bindings while OTD-IPC is active
+
 ## Protocol Flow
 
 ### 1. Discovery Phase
@@ -121,13 +126,15 @@ Sent whenever tablet state changes. Contains position, pressure, button, and pro
 **Fields:**
 - All Header fields
 - `validBits` (ValidMask): Bitmask indicating which fields contain valid data
-- `x` (float): X position in device units
-- `y` (float): Y position in device units
+- `x` (float): Horizontal distance from left edge in device units
+- `y` (float): Vertical distance from top edge in device units
 - `pressure` (uint32): Pen pressure
 - `penButtons` (uint32): Pen button state (bitmask, bit N = button N)
 - `auxButtons` (uint32): Auxiliary button state (bitmask, bit N = button N)
 - `hoverDistance` (uint32): Distance above surface in device-specific units
 - `penIsNearSurface` (bool): Whether pen is in proximity of tablet surface
+
+*(0, 0)* is the top left corner; coordinates increase to the right and down.
 
 **ValidMask values:**
 
