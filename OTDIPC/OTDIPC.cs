@@ -153,11 +153,6 @@ namespace OTDIPC
                     var productId = (UInt16)id.ProductID;
                     info.PersistentId =
                         $"otd-ipc.openkneeboard.com/vid-pid/{vendorId:X4}-{productId:X4}";
-                    // Marked obsolete, but we still want to populate them for existing clients
-#pragma warning disable CS0618
-                    info.VendorId = vendorId;
-                    info.ProductId = productId;
-#pragma warning restore CS0618
                 }
 
                 info.Header.NonPersistentTabletId = _nextNonPersistentTabletId++;

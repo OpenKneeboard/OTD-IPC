@@ -12,13 +12,17 @@ using System.Runtime.Versioning;
 namespace OTDIPC.V1;
 
 [SupportedOSPlatform("windows")]
-public class Server : ServerBase
+public sealed class Server : ServerBase
 {
     private const string MyImplementationId = "otd-ipc.openkneeboard.com";
     private const string PipeName = "com.fredemmott.openkneeboard.OTDIPC/v0.1";
 
     Ping _ping = new();
     NamedPipeServerStream? _connection;
+    private IDriver _driver;
+    private UInt16 _vendorId = 0;
+    private UInt16 _productId = 0;
+
 
     private V1.DeviceInfo _deviceInfo = new()
     {
@@ -27,21 +31,30 @@ public class Server : ServerBase
 
     public Server(IDriver driver) : base(driver)
     {
+        _driver = driver;
         if (driver.DeviceInfo.HasValue)
         {
-            _deviceInfo = ConvertDeviceInfo(driver.DeviceInfo.Value);
+            this.Driver_TabletChanged(this, driver.DeviceInfo.Value);
         }
     }
 
     protected override void Driver_StateChanged(object? sender, V2.State v2State)
     {
         V1.State v1State = ConvertState(v2State);
+        v1State.Header.VID = _vendorId;
+        v1State.Header.PID = _productId;
         this.SendMessage(v1State);
     }
 
     protected override void Driver_TabletChanged(object? sender, V2.DeviceInfo v2Info)
     {
         _deviceInfo = ConvertDeviceInfo(v2Info);
+        var id = _driver.Tablet!.Identifiers.First();
+        _vendorId = (UInt16)id.VendorID;
+        _productId = (UInt16)id.ProductID;
+        _deviceInfo.Header.VID = _vendorId;
+        _deviceInfo.Header.PID = _productId;
+
         this.SendMessage(_deviceInfo);
     }
 
@@ -142,11 +155,6 @@ public class Server : ServerBase
             MaxPressure = v2.MaxPressure,
             Name = v2.Name
         };
-
-#pragma warning disable CS0618
-        v1.Header.VID = v2.VendorId;
-        v1.Header.PID = v2.ProductId;
-#pragma warning restore CS0618
 
         return v1;
     }

@@ -1,6 +1,7 @@
 # OTD-IPC Protocol Documentation
 
-**Version:** v2.20260105.02
+**Version:** v2.20260105.03
+**Status:** Draft
 
 This document describes the V2 protocol used for communication between OpenTabletDriver and client applications.
 
@@ -112,8 +113,6 @@ Sent when a client connects (if device present) or when the tablet device change
 - `maxX` (float): Maximum X coordinate in device units
 - `maxY` (float): Maximum Y coordinate in device units
 - `maxPressure` (uint32): Maximum pressure value
-- `vendorId` (uint16): USB Vendor ID *(deprecated, use persistentId)*
-- `productId` (uint16): USB Product ID *(deprecated, use persistentId)*
 - `persistentId` (char[256]): Unique device identifier string (UTF-8)
     - this will be null-terminated if the string is shorter than 256 bytes
 - `name` (char[256]): Human-readable device name (UTF-8)

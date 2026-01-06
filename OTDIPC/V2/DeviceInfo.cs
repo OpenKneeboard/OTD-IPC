@@ -27,14 +27,6 @@ namespace OTDIPC.V2
 
         public UInt32 MaxPressure = 0;
 
-        [Obsolete(
-            "Use PersistentId instead. This remains so that clients that previously saw a device with V1 can recognize them with V2")]
-        public UInt16 VendorId = 0;
-
-        [Obsolete(
-            "Use PersistentId instead. This remains so that clients that previously saw a device with V1 can recognize them with V2")]
-        public UInt16 ProductId = 0;
-
         private const int PersistentIdMaxLength = 256;
         private fixed byte _PersistentId[PersistentIdMaxLength];
 

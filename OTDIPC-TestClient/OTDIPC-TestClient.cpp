@@ -29,14 +29,11 @@ void DumpMessage(const OTDIPC::Messages::DeviceInfo *const info) {
     std::println(
         "Device {:04x}: {}\n"
         "  Persistent ID: {}\n"
-        "  VID {:04x} PID {:04x}\n"
         "  {}x{}\n"
         "  max pressure: {}",
         info->nonPersistentTabletId,
         TruncateNulls(info->name),
         TruncateNulls(info->persistentId),
-        info->vendorId,
-        info->productId,
         info->maxX,
         info->maxY,
         info->maxPressure);
