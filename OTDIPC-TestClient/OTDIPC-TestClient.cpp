@@ -124,16 +124,19 @@ std::string GetPingText() {
   const auto& ping = gInfo.mPing;
 
   const auto ago = std::chrono::steady_clock::now() - ping.mTimestamp;
-  const auto localTime = std::chrono::zoned_time(
-    std::chrono::current_zone(),
-    std::chrono::time_point_cast<std::chrono::seconds>(
-      std::chrono::system_clock::now() - ago));
+  const auto unzonedTime = std::chrono::time_point_cast<std::chrono::seconds>(
+    std::chrono::system_clock::now() - ago);
+
+  // Shout out to Apple in 2026
+#if __cpp_lib_chrono > 201907
+  const auto time
+    = std::chrono::zoned_time(std::chrono::current_zone(), unzonedTime);
+#else
+  const auto time = unzonedTime;
+#endif
 
   return std::format(
-    "Ping: {} (seq #{}, count #{})",
-    localTime,
-    ping.mSequenceNumber,
-    ping.mCount);
+    "Ping: {} (seq #{}, count #{})", time, ping.mSequenceNumber, ping.mCount);
 }
 
 [[nodiscard]]
