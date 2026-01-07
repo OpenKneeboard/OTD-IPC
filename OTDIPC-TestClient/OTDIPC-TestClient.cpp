@@ -128,7 +128,7 @@ std::string GetPingText() {
     std::chrono::system_clock::now() - ago);
 
   // Shout out to Apple in 2026
-#if __cpp_lib_chrono > 201907
+#if __cpp_lib_chrono >= 201907
   const auto time
     = std::chrono::zoned_time(std::chrono::current_zone(), unzonedTime);
 #else
