@@ -284,6 +284,8 @@ int main() {
       case MessageType::DebugMessage:
         OnMessage<DebugMessage>(header);
         break;
+      case MessageType::Experimental:
+        break;
     }
   }
 }
