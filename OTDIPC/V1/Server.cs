@@ -19,7 +19,6 @@ public sealed class Server : ServerBase
 
     Ping _ping = new();
     NamedPipeServerStream? _connection;
-    private IDriver _driver;
     private UInt16 _vendorId = 0;
     private UInt16 _productId = 0;
 
@@ -31,7 +30,6 @@ public sealed class Server : ServerBase
 
     public Server(IDriver driver) : base(driver)
     {
-        _driver = driver;
         if (driver.DeviceInfo.HasValue)
         {
             this.Driver_TabletChanged(this, driver.DeviceInfo.Value);
@@ -40,10 +38,7 @@ public sealed class Server : ServerBase
 
     protected override void Driver_StateChanged(object? sender, V2.State v2State)
     {
-        V1.State v1State = ConvertState(v2State);
-        v1State.Header.VID = _vendorId;
-        v1State.Header.PID = _productId;
-        this.SendMessage(v1State);
+        this.SendMessage(ConvertState(v2State));
     }
 
     protected override void Driver_TabletChanged(object? sender, V2.DeviceInfo v2Info)
@@ -159,7 +154,7 @@ public sealed class Server : ServerBase
         return v1;
     }
 
-    private static V1.State ConvertState(V2.State v2)
+    private V1.State ConvertState(V2.State v2)
     {
         return new V1.State
         {
@@ -167,10 +162,8 @@ public sealed class Server : ServerBase
             {
                 MessageType = V1.MessageType.State,
                 Size = (UInt32)Marshal.SizeOf(typeof(V1.State)),
-#pragma warning disable CS0618
-                VID = 0, // V1 doesn't track this per-state
-                PID = 0
-#pragma warning restore CS0618
+                VID = _vendorId,
+                PID = _productId,
             },
             PositionValid = v2.ValidBits.HasFlag(V2.State.ValidMask.Position),
             X = v2.X,
@@ -178,7 +171,7 @@ public sealed class Server : ServerBase
             PressureValid = v2.ValidBits.HasFlag(V2.State.ValidMask.Pressure),
             Pressure = v2.Pressure,
             PenButtonsValid = v2.ValidBits.HasFlag(V2.State.ValidMask.PenButtons),
-            PenButtons = v2.PenButtons,
+            PenButtons = (v2.PenButtons) >> 1, // V2 requires pen tip as button 0, V1 bans it
             AuxButtonsValid = v2.ValidBits.HasFlag(V2.State.ValidMask.AuxButtons),
             AuxButtons = v2.AuxButtons,
             ProximityValid = v2.ValidBits.HasFlag(V2.State.ValidMask.PenIsNearSurface),

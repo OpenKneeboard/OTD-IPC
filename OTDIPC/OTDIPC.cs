@@ -70,6 +70,7 @@ namespace OTDIPC
                 _state.Pressure = tabletReport.Pressure;
                 _state.ValidBits |= State.ValidMask.Pressure;
 
+                _state.PenButtons = 0;
                 var buttons = tabletReport.PenButtons;
                 for (int i = 0; i < buttons.Length; i++)
                 {
@@ -77,10 +78,12 @@ namespace OTDIPC
                     {
                         _state.PenButtons |= (UInt32)(1 << i);
                     }
-                    else
-                    {
-                        _state.PenButtons &= (UInt32)~(1 << i);
-                    }
+                }
+
+                _state.PenButtons <<= 1;
+                if (_state.Pressure > 0)
+                {
+                    _state.PenButtons |= 1;
                 }
 
                 _state.ValidBits |= State.ValidMask.PenButtons;
