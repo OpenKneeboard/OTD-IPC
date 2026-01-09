@@ -21,17 +21,17 @@ Download `OpenKneeboard-OTC-IPC-vVERSION.zip` from [the latest release](https://
 
 Open OpenTabletDriver, then open it's plugin manager:
 
-![](getting-started/open-plugin-manager.png)
+![](open-plugin-manager.png)
 
 Drag-and-drop the OpenKneeboard-OTC-IPC .zip from your Downloads folder to the plugin manager Window; you should then see "OpenKneeboard OTD-IPC" in the list on the left, and when you click it, you should see something like this:
 
-![](getting-started/with-otd-ipc.png)
+![](with-otd-ipc.png)
 
 Finally, close the plugin manager window.
 
 ## Enabling OpenKneeboard OTD-IPC
 
-![](getting-started/filter-settings.png)
+![](filter-settings.png)
 
 1. Select the tablet you want to use with OpenKneeboard in the bottom left
 2. Switch to the filters tab

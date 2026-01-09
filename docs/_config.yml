@@ -1,0 +1,22 @@
+repository: OpenKneeboard/OTD-IPC
+title: OTD-IPC
+description: Plugin for OpenTabletDriver adding an exclusive access mode for applications
+theme: just-the-docs
+color_scheme: dark
+permalink: pretty
+gh_edit_link: true
+gh_edit_link_text: "Edit this page on GitHub"
+gh_edit_repository: https://github.com/OpenKneeboard/OTD-IPC
+gh_edit_branch: develop
+gh_edit_source: docs
+gh_edit_view_mode: edit
+callouts:
+  warning:
+    title: Warning
+    color: red
+  note:
+    title: Note
+    color: green
+plugins:
+  - github-pages
+  - just-the-docs
