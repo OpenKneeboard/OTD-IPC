@@ -27,15 +27,20 @@ param(
   [ValidateSet('Debug', 'Release')]
   [string] $Configuration='Debug',
   [string] $Out="$(Get-Location)/out",
-  [string] $Platform="x64"
+  [string] $Platform="x64",
+  [string] $Version
 )
 
 If (!(Test-Path $Out)) {
   New-Item -ItemType Directory -Path $Out
 }
 
-$proj = [Xml](Get-Content OTDIPC/OTDIPC.csproj)
-$pluginVersion = $proj.Project.PropertyGroup.AssemblyVersion
+$pluginVersion = $Version
+if ($pluginVersion -eq "")
+{
+  $proj = [Xml](Get-Content OTDIPC/OTDIPC.csproj)
+  $pluginVersion = $proj.Project.PropertyGroup.AssemblyVersion
+}
 Set-Content $Out/version.txt -Value $pluginVersion
 
 $metadataJson = "${Out}/metadata.json"
