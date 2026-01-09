@@ -1,4 +1,9 @@
-﻿# OTD-IPC
+﻿---
+title: Home
+nav_order: 0
+---
+
+# OTD-IPC
 
 This is a plugin for [OpenTabletDriver], allowing programs to take exclusive control of the tablet.
 
