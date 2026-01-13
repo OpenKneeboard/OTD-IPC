@@ -17,15 +17,13 @@ Once you have removed other tablet drivers, [install OpenTabletDriver](https://o
 
 ## Installing OpenKneeboard OTD-IPC
 
-Download `OpenKneeboard-OTC-IPC-vVERSION.zip` from [the latest release](https://github.com/OpenKneeboard/OTD-IPC/releases/latest) - but don't unzip it.
-
-Open OpenTabletDriver, then open it's plugin manager:
+Open OpenTabletDriver, then open its plugin manager:
 
 ![](open-plugin-manager.png)
 
-Drag-and-drop the OpenKneeboard-OTC-IPC .zip from your Downloads folder to the plugin manager Window; you should then see "OpenKneeboard OTD-IPC" in the list on the left, and when you click it, you should see something like this:
+Find *'OpenKneeboard OTD-IPC'* in the list, and click *Install*:
 
-![](with-otd-ipc.png)
+![](plugin-manager.png)
 
 Finally, close the plugin manager window.
 
