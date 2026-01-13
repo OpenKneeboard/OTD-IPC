@@ -141,9 +141,7 @@ public sealed class Server : ServerBase
 
     public override void Dispose()
     {
-        var conn = Interlocked.Exchange(ref _connection, null);
-        conn?.Dispose();
-
+        Interlocked.Exchange(ref _connection, null)?.Dispose();
         base.Dispose();
         Log.Write("otd-ipc", "V1 server disposed");
     }

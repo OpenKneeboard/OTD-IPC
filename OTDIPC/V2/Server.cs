@@ -36,13 +36,15 @@ public class Server : ServerBase
 
     protected override void Driver_StateChanged(object? sender, State state)
     {
-        System.Diagnostics.Debug.Assert(!RuntimeHelpers.IsReferenceOrContainsReferences<State>(), "V2.State must be unmanaged");
+        System.Diagnostics.Debug.Assert(!RuntimeHelpers.IsReferenceOrContainsReferences<State>(),
+            "V2.State must be unmanaged");
         this.SendMessage(state);
     }
 
     protected override void Driver_TabletChanged(object? sender, DeviceInfo info)
     {
-        System.Diagnostics.Debug.Assert(!RuntimeHelpers.IsReferenceOrContainsReferences<DeviceInfo>(), "V2.DeviceInfo must be unmanaged");
+        System.Diagnostics.Debug.Assert(!RuntimeHelpers.IsReferenceOrContainsReferences<DeviceInfo>(),
+            "V2.DeviceInfo must be unmanaged");
         _deviceInfo = info;
         this.SendMessage(info);
     }
@@ -55,9 +57,19 @@ public class Server : ServerBase
             MessageType = V2.MessageType.DebugMessage,
             Size = (UInt32)(Marshal.SizeOf<V2.Header>() + bytes.Length),
         };
-        System.Diagnostics.Debug.Assert(!RuntimeHelpers.IsReferenceOrContainsReferences<Header>(), "V2.Header must be unmanaged");
+        System.Diagnostics.Debug.Assert(!RuntimeHelpers.IsReferenceOrContainsReferences<Header>(),
+            "V2.Header must be unmanaged");
         SendMessage(header);
         WriteBytes(bytes);
+    }
+
+    public override void Dispose()
+    {
+        Log.Write("otd-ipc", "disposing V2 server");
+        Interlocked.Exchange(ref _listener, null)?.Dispose();
+        Interlocked.Exchange(ref _connection, null)?.Dispose();
+        base.Dispose();
+        Log.Write("otd-ipc", "V2 server disposed");
     }
 
     protected override void WriteBytes(ReadOnlySpan<byte> bytes)
@@ -150,9 +162,18 @@ public class Server : ServerBase
         }
 
         Log.Write("otd-ipc", "Waiting for connection");
-        var client = await _listener.AcceptAsync();
+        try
+        {
+            _connection = await _listener.AcceptAsync();
+        }
+        catch (SocketException e)
+        {
+            Log.Write("otd-ipc", "V2 server failed to accept connection: " + e.Message);
+            _connection = null;
+            return;
+        }
+
         Log.Write("otd-ipc", "Client connected");
-        _connection = client;
         _waitingForConnection = false;
         _connected = true;
 
@@ -181,7 +202,8 @@ public class Server : ServerBase
         }
 
         _ping.SequenceNumber++;
-        System.Diagnostics.Debug.Assert(!RuntimeHelpers.IsReferenceOrContainsReferences<Ping>(), "V2.Ping must be unmanaged");
+        System.Diagnostics.Debug.Assert(!RuntimeHelpers.IsReferenceOrContainsReferences<Ping>(),
+            "V2.Ping must be unmanaged");
         SendMessage(_ping);
     }
 
