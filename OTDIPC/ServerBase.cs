@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 
 namespace OTDIPC;
 
-public abstract class ServerBase : IDisposable, IServer
+public abstract class ServerBase : IServer
 {
     protected readonly IDriver _driver;
     protected Timer? _timer;
@@ -31,6 +31,7 @@ public abstract class ServerBase : IDisposable, IServer
 
     public virtual void Dispose()
     {
+        GC.SuppressFinalize(this);
         _timer?.Dispose();
         _driver.TabletChanged -= Driver_TabletChanged;
         _driver.StateChanged -= Driver_StateChanged;

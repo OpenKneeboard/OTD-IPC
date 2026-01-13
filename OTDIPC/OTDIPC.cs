@@ -12,7 +12,7 @@ using OTDIPC.V2;
 namespace OTDIPC
 {
     [PluginName("OpenKneeboard (OTD-IPC)")]
-    public class OTDIPC : IPositionedPipelineElement<IDeviceReport>, IDriver
+    public sealed class OTDIPC : IPositionedPipelineElement<IDeviceReport>, IDriver, IDisposable
     {
         State _state = new();
         private DeviceInfo? _deviceInfo;
@@ -43,6 +43,14 @@ namespace OTDIPC
                 {
                     new V2.Server(this),
                 };
+            }
+        }
+
+        public void Dispose()
+        {
+            foreach (var server in _servers)
+            {
+                server.Dispose();
             }
         }
 

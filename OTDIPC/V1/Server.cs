@@ -115,7 +115,17 @@ public sealed class Server : ServerBase
         _connection = pipe;
 
         Log.Write("otd-ipc", "Waiting for connection");
-        await pipe.WaitForConnectionAsync();
+        try
+        {
+            await pipe.WaitForConnectionAsync();
+        }
+        catch (IOException e)
+        {
+            _waitingForConnection = false;
+            Log.Write("otd-ipc", "Waiting for connection failed: " + e.Message);
+            return;
+        }
+
         Log.Write("otd-ipc", "Client connected");
         _waitingForConnection = false;
         _connected = true;
@@ -127,6 +137,15 @@ public sealed class Server : ServerBase
     {
         System.Diagnostics.Debug.WriteLine("V1 client connected; sending device info");
         this.SendMessage(_deviceInfo);
+    }
+
+    public override void Dispose()
+    {
+        var conn = Interlocked.Exchange(ref _connection, null);
+        conn?.Dispose();
+
+        base.Dispose();
+        Log.Write("otd-ipc", "V1 server disposed");
     }
 
     protected override void Ping()
