@@ -14,7 +14,6 @@ namespace OTDIPC.V1;
 [SupportedOSPlatform("windows")]
 public sealed class Server : ServerBase
 {
-    private const string MyImplementationId = "otd-ipc.openkneeboard.com";
     private const string PipeName = "com.fredemmott.openkneeboard.OTDIPC/v0.1";
 
     Ping _ping = new();
