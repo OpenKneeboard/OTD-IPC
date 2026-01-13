@@ -65,11 +65,11 @@ public class Server : ServerBase
 
     public override void Dispose()
     {
-        Log.Write("otd-ipc", "disposing V2 server");
+        Log.Write("otd-ipc-v2", "disposing server");
         Interlocked.Exchange(ref _listener, null)?.Dispose();
         Interlocked.Exchange(ref _connection, null)?.Dispose();
         base.Dispose();
-        Log.Write("otd-ipc", "V2 server disposed");
+        Log.Write("otd-ipc-v2", "server disposed");
     }
 
     protected override void WriteBytes(ReadOnlySpan<byte> bytes)
@@ -100,7 +100,7 @@ public class Server : ServerBase
             return;
         }
 
-        System.Diagnostics.Debug.WriteLine("Error writing to unix domain socket, resetting server");
+        Log.Write("otd-ipc-v2", "Error writing to unix domain socket, resetting server");
         _connected = false;
         try
         {
@@ -135,7 +135,7 @@ public class Server : ServerBase
 
         if (_listener == null)
         {
-            Log.Write("otd-ipc", "Starting unix domain socket server at " + _socketPath);
+            Log.Write("otd-ipc-v2", "Starting unix domain socket server at " + _socketPath);
             try
             {
                 // On Unix, ensure any previous socket file is removed
@@ -161,19 +161,19 @@ public class Server : ServerBase
             PublishDiscoveryData();
         }
 
-        Log.Write("otd-ipc", "Waiting for connection");
+        Log.Write("otd-ipc-v2", "Waiting for connection");
         try
         {
             _connection = await _listener.AcceptAsync();
         }
         catch (SocketException e)
         {
-            Log.Write("otd-ipc", "V2 server failed to accept connection: " + e.Message);
+            Log.Write("otd-ipc-v2", "server failed to accept connection: " + e.Message);
             _connection = null;
             return;
         }
 
-        Log.Write("otd-ipc", "Client connected");
+        Log.Write("otd-ipc-v2", "Client connected");
         _waitingForConnection = false;
         _connected = true;
 
@@ -182,15 +182,15 @@ public class Server : ServerBase
 
     void OnClientConnected()
     {
-        System.Diagnostics.Debug.WriteLine("Sending hello");
+        Log.Write("otd-ipc-v2", "Sending hello");
         this.SendDebugMessage(_implementationIdDebugMessage);
         if (!_deviceInfo.HasValue)
         {
-            System.Diagnostics.Debug.WriteLine("Device not seen - not sending device info");
+            Log.Write("otd-ipc-v2", "Device not seen - not sending device info");
             return;
         }
 
-        System.Diagnostics.Debug.WriteLine("Sending device info");
+        Log.Write("otd-ipc-v2", "Sending device info");
         this.SendMessage(_deviceInfo.Value);
     }
 
@@ -230,7 +230,7 @@ public class Server : ServerBase
         }
         catch (Exception e)
         {
-            Log.Write("otd-ipc", $"failed to create discovery directory: {e.Message}", LogLevel.Error);
+            Log.Write("otd-ipc-v2", $"failed to create discovery directory: {e.Message}", LogLevel.Error);
             return;
         }
 
@@ -254,16 +254,16 @@ SOCKET={GetSocketPath()}
         }
         catch (Exception e)
         {
-            Log.Write("otd-ipc", $"failed to write discovery metadata file: {e.Message}", LogLevel.Error);
+            Log.Write("otd-ipc-v2", $"failed to write discovery metadata file: {e.Message}", LogLevel.Error);
             return;
         }
 
-        Log.Write("otd-ipc", $"published discovery metadata file: {metadataFile}");
+        Log.Write("otd-ipc-v2", $"published discovery metadata file: {metadataFile}");
 
         var defaultPath = Path.Join(root, "default.txt");
         if (File.Exists(defaultPath))
         {
-            Log.Debug("otd-ipc", $"discovery defaults file already exists: {defaultPath}");
+            Log.Write("otd-ipc-v2", $"discovery defaults file already exists: {defaultPath}");
             return;
         }
 
@@ -273,10 +273,10 @@ SOCKET={GetSocketPath()}
         }
         catch (Exception e)
         {
-            Log.Write("otd-ipc", $"failed to write discovery defaults file: {e.Message}", LogLevel.Error);
+            Log.Write("otd-ipc-v2", $"failed to write discovery defaults file: {e.Message}", LogLevel.Error);
         }
 
-        Log.Write("otd-ipc", $"published discovery defaults file: {defaultPath}");
+        Log.Write("otd-ipc-v2", $"published discovery defaults file: {defaultPath}");
     }
 
     private static string GenerateImplementationIdDebugMessage()

@@ -70,7 +70,7 @@ public sealed class Server : ServerBase
             return;
         }
 
-        System.Diagnostics.Debug.WriteLine("Error writing to named pipe, resetting server");
+        Log.Write("otd-ipc-v1", "Error writing to named pipe, resetting server");
         _connected = false;
         try
         {
@@ -103,7 +103,7 @@ public sealed class Server : ServerBase
 
         _connection = null;
 
-        Log.Write("otd-ipc", "Starting named pipe server at " + PipeName);
+        Log.Write("otd-ipc-v1", "Starting named pipe server at " + PipeName);
 
         var pipe = new NamedPipeServerStream(
             PipeName,
@@ -113,7 +113,7 @@ public sealed class Server : ServerBase
             PipeOptions.Asynchronous);
         _connection = pipe;
 
-        Log.Write("otd-ipc", "Waiting for connection");
+        Log.Write("otd-ipc-v1", "Waiting for connection");
         try
         {
             await pipe.WaitForConnectionAsync();
@@ -121,11 +121,11 @@ public sealed class Server : ServerBase
         catch (IOException e)
         {
             _waitingForConnection = false;
-            Log.Write("otd-ipc", "Waiting for connection failed: " + e.Message);
+            Log.Write("otd-ipc-v1", "Waiting for connection failed: " + e.Message);
             return;
         }
 
-        Log.Write("otd-ipc", "Client connected");
+        Log.Write("otd-ipc-v1", "Client connected");
         _waitingForConnection = false;
         _connected = true;
 
@@ -134,15 +134,16 @@ public sealed class Server : ServerBase
 
     void OnClientConnected()
     {
-        System.Diagnostics.Debug.WriteLine("V1 client connected; sending device info");
+        Log.Write("otd-ipc-v1", "client connected; sending device info");
         this.SendMessage(_deviceInfo);
     }
 
     public override void Dispose()
     {
+        Log.Write("otd-ipc-v1", "disposing server");
         Interlocked.Exchange(ref _connection, null)?.Dispose();
         base.Dispose();
-        Log.Write("otd-ipc", "V1 server disposed");
+        Log.Write("otd-ipc-v1", "server disposed");
     }
 
     protected override void Ping()
