@@ -14,11 +14,11 @@ namespace OTDIPC::inline V2::Messages {
 		static constexpr MessageType MESSAGE_TYPE = MessageType::DebugMessage;
 
 		Header header { .messageType = MESSAGE_TYPE };
-		char first {};
+		char data[1] {};
 
 		std::string_view message() const
 		{
-			return { &first, header.size - offsetof(DebugMessage, first) };
+			return { data, header.size - offsetof(DebugMessage, data) };
 		}
 	};
 }

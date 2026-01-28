@@ -1,6 +1,6 @@
 # Protocol
 
-**Version:** v2.20260106.01
+**Version:** v2.20260128.01
 
 **Status:** Draft
 
@@ -46,10 +46,15 @@ The client connects to the Unix domain socket at the discovered path.
 
 ### 3. Handshake Phase
 
-Upon client connection, the server sends:
+Upon client connection, the server:
 
-1. **DebugMessage** containing implementation identification (e.g., `"OTD-IPC: 'OTDIPC' v1.0.0 running on 'OpenTabletDriver' v0.6.0"`)
-2. **DeviceInfo** message if a tablet device is currently connected (optional, only sent if device is present)
+1. SHOULD send **DebugMessage** containing implementation identification (e.g., `"OTD-IPC: 'OTDIPC' v1.0.0 running on 'OpenTabletDriver' v0.6.0"`)
+2. MUST send **DeviceInfo** message if a tablet device is currently connected
+3. MUST NOT send **DeviceInfo** message if no tablet device is connected
+
+Upon connection, the client:
+
+1. SHOULD send **DebugMessage** containing implementation identification (e.g., "OTDIPC-TestClient" or "OpenKneeboard v2.0.0");
 
 ### 4. Operational Phase
 
@@ -68,7 +73,8 @@ Client                          Server
   |                               |
   |-- Connect to socket --------->|
   |                               |
-  |<-- DebugMessage --------------|  (implementation ID and version)
+  |-------------- DebugMessage -->|  (client implementation ID and version)
+  |<-- DebugMessage --------------|  (server implementation ID and version)
   |<-- DeviceInfo ----------------|  (if device present)
   |                               |
   |<-- State ---------------------|  (on tablet events)
@@ -86,12 +92,12 @@ The `DebugMessage` is optional, but strongly recommended for debugging and visbi
 
 All messages follow the same structure: a header followed by message-specific data.
 
-| Message Type | ID | Description | Direction |
-|--------------|-----|-------------|-----------|
-| **DeviceInfo** | 1 | Tablet device information | Server → Client |
-| **State** | 2 | Current tablet state | Server → Client |
-| **Ping** | 3 | Connection keepalive | Server → Client |
-| **DebugMessage** | 4 | Variable-length debug string | Server → Client |
+| Message Type | ID | Description                           | Direction |
+|--------------|-----|---------------------------------------|-----------|
+| **DeviceInfo** | 1 | Tablet device information             | Server → Client |
+| **State** | 2 | Current tablet state                  | Server → Client |
+| **Ping** | 3 | Connection keepalive                  | Server → Client |
+| **DebugMessage** | 4 | Variable-length UTF-8 string          | Server ↔ Client |
 | **Experimental** | 5 | GUID-identified experimental messages | Server ↔ Client |
 
 ### Message Details
@@ -173,6 +179,9 @@ Variable-length message containing UTF-8 text for debugging/logging purposes.
 - UTF-8 text data (length = `size - sizeof(Header)`)
 
 The text is NOT null-terminated. Use the size field to determine text length.
+
+- Both clients and servers MAY send this at any time
+- Both clients and servers SHOULD send this message shortly after connection, identifying the implementation and version
 
 #### Experimental (ID: 5)
 
@@ -292,6 +301,9 @@ SOCKET=/home/user/.local/share/otd-ipc/sock
 - Servers MAY notify the user that they are not default, and provide an opt-in path
 - Servers MUST NOT persist an opt-in choice to replace the default
 - Servers MAY replace an existing `default.txt` on installation, as long as 'installation' is not considered part of regular startup
+- Servers MUST accept messages from the clients
+- Servers MUST fully consume all messages from the clients, including ones with an unrecognized message type; the size from the header should be used to read the payload
+- Servers MUST NOT require that message types are recognized
 
 - Servers SHOULD clean up their metadata file on clean shutdown
 - Clients SHOULD handle stale files gracefully
@@ -342,6 +354,7 @@ SOCKET=/home/user/.local/share/otd-ipc/sock
 - [ ] Send State messages when tablet state changes
 - [ ] Send Ping messages periodically
 - [ ] Send DeviceInfo when device changes
+- [ ] Fully consume all messages from the client using the header size
 - [ ] Handle client disconnect gracefully
 - [ ] Accept next client after disconnect
 

@@ -237,6 +237,18 @@ int main() {
   static_assert(sizeof(buffer) >= sizeof(State));
   const auto header = reinterpret_cast<const Header* const>(buffer);
 
+  {
+    const auto dbgMessage = reinterpret_cast<DebugMessage*>(buffer);
+    *dbgMessage = {};
+    constexpr std::string_view kMessage = "Hello from OTDIPC-TestClient";
+    dbgMessage->header.size = sizeof(Header) + kMessage.size();
+    memcpy(dbgMessage->data, kMessage.data(), kMessage.size());
+    if (const auto written = (*connection)->Write(buffer, dbgMessage->header.size); !written) {
+      std::cerr << "Failed to write client hello: " << written.error() << std::endl;
+      return EXIT_FAILURE;
+    }
+  }
+
   const ScopedAlternateBuffer useAlternateBuffer;
 
   while (true) {

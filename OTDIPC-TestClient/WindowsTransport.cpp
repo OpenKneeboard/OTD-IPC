@@ -124,6 +124,23 @@ std::expected<size_t, std::string> WindowsTransport::Read(void* buffer, const si
     }
     return total;
 }
+std::expected<void, std::string> WindowsTransport::Write(
+  const void* buffer,
+  size_t bufferSize) noexcept {
+  if (!mSocket.valid()) {
+    return std::unexpected{"Socket is not connected"};
+  }
+  if (const int ret = send(
+        mSocket.get(),
+        static_cast<const char*>(buffer),
+        static_cast<int>(bufferSize),
+        0);
+      ret == SOCKET_ERROR) {
+    const auto err = WSAGetLastError();
+    return std::unexpected{std::format("send failed: {}", err)};
+  }
+  return {};
+}
 
 WindowsTransport::unique_socket::unique_socket(unique_socket&& other) noexcept : mSocket(
     std::exchange(other.mSocket, INVALID_SOCKET))

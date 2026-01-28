@@ -178,6 +178,75 @@ public class Server : ServerBase
         _connected = true;
 
         OnClientConnected();
+        await HandleClientMessagesAsync();
+    }
+
+    private async Task<byte[]?> ReadBytes(int count)
+    {
+        var buffer = new byte[count];
+        var totalRead = 0;
+        while (totalRead < count)
+        {
+            if (_connection == null)
+            {
+                return null;
+            }
+
+            var read = await _connection.ReceiveAsync(
+                new Memory<byte>(buffer, totalRead, count - totalRead),
+                SocketFlags.None);
+
+            if (read <= 0) return null; // Connection closed
+            totalRead += read;
+        }
+
+        return buffer;
+    }
+
+    private async Task HandleClientMessagesAsync()
+    {
+        var headerSize = Marshal.SizeOf<V2.Header>();
+
+        try
+        {
+            while (_connected && _connection != null)
+            {
+                var headerBuffer = await ReadBytes(headerSize);
+                if (headerBuffer == null)
+                {
+                    break;
+                }
+
+                var header = MemoryMarshal.Read<V2.Header>(headerBuffer);
+
+                int payloadSize = (int)header.Size - headerSize;
+                byte[]? payload = null;
+                if (payloadSize > 0)
+                {
+                    payload = await ReadBytes(payloadSize);
+                }
+
+                OnClientMessage(header, payload);
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Write("otd-ipc-v2", $"Connection lost while receiving: {e.Message}");
+        }
+    }
+
+    void OnClientMessage(V2.Header header, byte[]? payload)
+    {
+        if (header.MessageType == V2.MessageType.DebugMessage && payload != null)
+        {
+            var message = Encoding.UTF8.GetString(payload);
+            Log.Write("otd-ipc-v2", $"Client debug message: {message}");
+        }
+        else
+        {
+            // DebugMessage is the only expected type at the moment
+            Log.Write("otd-ipc-v2", $"Client sent unexpected message type: {(uint)header.MessageType}");
+        }
     }
 
     void OnClientConnected()

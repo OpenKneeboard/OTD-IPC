@@ -5,22 +5,26 @@
 #include "Transport.hpp"
 
 #include <expected>
-#include <utility>
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "unique_fd.hpp"
 
-class LinuxTransport final : public Transport
-{
-public:
-    LinuxTransport() = delete;
-    ~LinuxTransport() final;
+class LinuxTransport final : public Transport {
+ public:
+  LinuxTransport() = delete;
+  ~LinuxTransport() final;
 
-    static std::expected<std::unique_ptr<Transport>, std::string> Open() noexcept;
-    std::expected<size_t, std::string> Read(void *buffer, size_t bufferSize) noexcept override;
+  static std::expected<std::unique_ptr<Transport>, std::string> Open() noexcept;
+  std::expected<size_t, std::string> Read(
+    void* buffer,
+    size_t bufferSize) noexcept override;
+  std::expected<void, std::string> Write(
+    void const* buffer,
+    size_t bufferSize) noexcept override;
 
-private:
-    explicit LinuxTransport(unique_fd fd) noexcept;
-    unique_fd mFD{};
+ private:
+  explicit LinuxTransport(unique_fd fd) noexcept;
+  unique_fd mFD {};
 };
