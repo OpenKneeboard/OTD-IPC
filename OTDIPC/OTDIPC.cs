@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Tablet;
@@ -29,6 +30,7 @@ namespace OTDIPC
 
         public OTDIPC()
         {
+            Log.Write("otd-ipc", "initializing plugin");
             if (OperatingSystem.IsWindows())
             {
                 _servers = new IServer[]
@@ -48,10 +50,13 @@ namespace OTDIPC
 
         public void Dispose()
         {
+            Log.Write("otd-ipc", "disposing plugin");
             foreach (var server in _servers)
             {
                 server.Dispose();
             }
+
+            Log.Write("otd-ipc", "disposed plugin");
         }
 
         public void Consume(IDeviceReport deviceReport)
