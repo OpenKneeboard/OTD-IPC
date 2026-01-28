@@ -159,14 +159,29 @@ std::string GetDebugMessageText() {
 }
 
 void Dump() {
-  std::print(
+  const auto message = std::format(
+    "\033[?2026h"// begin synchronized update
     "\033[2J"// clear entire screen
     "\033[1;1H"// cursor to top left
-    "{}\n{}\n{}\n{}",
+    "{}\n{}\n{}\n{}"
+    "\033[?2026l",// end synchronized update
     GetDeviceText(),
     GetStateText(),
     GetPingText(),
     GetDebugMessageText());
+
+  // Avoid flicker on updates: send the whole message in one buffer
+  // In buffered mode, Windows Terminal will draw char-at-a-time with noticeable
+  // flicker even within a single print statement
+  //
+  // This isn't needed if the terminal recognizes the synchronized update escape
+  // codes above, but as of 2026-01-28 it's a bit too new to depend on, e.g.
+  // it's been in Windows Terminal for two weeks
+  setvbuf(
+    stdout, nullptr, _IOFBF, std::max<std::size_t>(BUFSIZ, message.size()));
+  std::print("{}", message);
+  fflush(stdout);
+  std::setvbuf(stdout, nullptr, _IONBF, 0);
 }
 
 void OnMessage(const OTDIPC::Messages::DeviceInfo& info) {
@@ -243,8 +258,11 @@ int main() {
     constexpr std::string_view kMessage = "Hello from OTDIPC-TestClient";
     dbgMessage->header.size = sizeof(Header) + kMessage.size();
     memcpy(dbgMessage->data, kMessage.data(), kMessage.size());
-    if (const auto written = (*connection)->Write(buffer, dbgMessage->header.size); !written) {
-      std::cerr << "Failed to write client hello: " << written.error() << std::endl;
+    if (const auto written
+        = (*connection)->Write(buffer, dbgMessage->header.size);
+        !written) {
+      std::cerr << "Failed to write client hello: " << written.error()
+                << std::endl;
       return EXIT_FAILURE;
     }
   }
