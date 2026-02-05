@@ -20,6 +20,7 @@
 #include <OTD-IPC/DeviceInfo.hpp>
 #include <OTD-IPC/Ping.hpp>
 #include <OTD-IPC/State.hpp>
+#include <OTD-IPC/Hello.hpp>
 
 namespace {
 template <std::size_t N>
@@ -206,6 +207,16 @@ void OnMessage(const OTDIPC::Messages::DebugMessage& msg) {
   Dump();
 }
 
+void OnMessage(const OTDIPC::Messages::Hello& msg) {
+  gDebugMessages.emplace_back(std::format("Server hello: {} {} (proto {:#x}, ID '{}'/ cv {})",
+    TruncateNulls(msg.humanReadableName),
+    TruncateNulls(msg.humanReadableVersion),
+    msg.protocolVersion,
+    TruncateNulls(msg.implementationID),
+    msg.compatibilityVersion
+    ));
+}
+
 template <class T>
 void OnMessage(const OTDIPC::Messages::Header* const header) {
   if (header->size < sizeof(T)) {
@@ -253,18 +264,14 @@ int main() {
   const auto header = reinterpret_cast<const Header* const>(buffer);
 
   {
-    const auto dbgMessage = reinterpret_cast<DebugMessage*>(buffer);
-    *dbgMessage = {};
-    constexpr std::string_view kMessage = "Hello from OTDIPC-TestClient";
-    dbgMessage->header.size = sizeof(Header) + kMessage.size();
-    memcpy(dbgMessage->data, kMessage.data(), kMessage.size());
-    if (const auto written
-        = (*connection)->Write(buffer, dbgMessage->header.size);
-        !written) {
-      std::cerr << "Failed to write client hello: " << written.error()
-                << std::endl;
-      return EXIT_FAILURE;
-    }
+    const Hello hello {
+      .protocolVersion = 0x02'20260205'01,
+      .humanReadableName = "OTDIPC-TestClient",
+      .humanReadableVersion = "master",
+      .implementationID = "test-client.otd-ipc.openkneeboard.com",
+      .compatibilityVersion = 1,
+    };
+    std::ignore = (*connection)->Write(&hello, sizeof(hello));
   }
 
   const ScopedAlternateBuffer useAlternateBuffer;
@@ -318,6 +325,9 @@ int main() {
         OnMessage<DebugMessage>(header);
         break;
       case MessageType::Experimental:
+        break;
+      case MessageType::Hello:
+        OnMessage<Hello>(header);
         break;
     }
   }

@@ -1,6 +1,6 @@
 # Protocol
 
-**Version:** v2.20260128.01
+**Version:** v2.20260205.01
 
 **Status:** Draft
 
@@ -14,7 +14,6 @@ The V2 protocol enables exclusive, real-time access to tablet state from OpenTab
 
 Communication uses Unix domain sockets on all platforms (Windows, macOS, Linux). The socket path varies by implementation to support multiple servers, and is discovered through a file-based discovery mechanism (see [Discovery Mechanism](#discovery-mechanism)).
 
-
 **Legacy Note:** The obsolete V1 protocol used Windows named pipes in message mode; later versions moved to Unix domain sockets on all platforms for consistency, as Windows gained support for Unix sockets in the Windows 10 October 2018 Update.
 
 ### Connection Model
@@ -27,6 +26,42 @@ This is primarily intended for exclusive access while gaming; as such, while in-
 
 - expose the full tablet area, ignoring any active area clipping or monitor mapping, unless the user has explicitly indicated they want this to affect OTD-IPC
 - expose all buttons, suppressing their usual behavior, unless the user has explicitly indicated they want to use their usual bindings while OTD-IPC is active
+
+## Implementation Names, IDs, and Versions
+
+Names, IDs, and versions serve two primary purposes in this protocol:
+
+- human-readable values: useful for debug logs and user interfaces, e.g. for allowing the user to select between implementations, or showing error messages
+- machine-readable values: also useful for debug logs. Allows unambiguous identification of peers
+
+Separate fields are used for these, both in server ↔ client 'Hello' messages, and in server metadata:
+
+- **implementationID**: a unique identifier for the implementation
+  - implementations MAY use any UTF-8 string that uniquely identifies the implementation
+  - implementations SHOULD use a developer-readable 'owned' identifier, e.g. `myproject.mydomain.com`, `github.com/myusername/myproject', etc
+  - implementations MUST NOT routinely change this value
+    - it would perhaps be appropriate after a major rewrite
+    - implementations MUST NOT change this value after purely user-facing rebrands
+- **humanReadableName**: a user-friendly 'product name'
+  - implementations SHOULD prefer showing this over 'implementation ID' in most user-facing situations; a counter-example would be debug logs
+  - implementations SHOULD NOT use this to identify specific implementations in code
+- **compatibilityVersion**: `uint8_t` (0-255): machine-readable version suitable for gating behavior changes/workarounds
+  - implementations SHOULD initially use `1` as the value
+  - implementations MAY increment this value when major issues are fixed (i.e. if it is known or likely that other implementations have blocked or added workarounds for previous versions)
+  - implementations MUST NOT change this value as a routine part of their release process
+  - this field is intentionally too small to support reasonable encodings of regular version numbers, as they do not fit the requirements above
+- **humanReadableVersion**: a user-friendly version identifier
+  - implementations MAY store any valid UTF-8 string here
+  - implementations MUST treat this as an opaque-string
+  - implementations MUST NOT assume this string matches any particular pattern, e.g. `a.b.c.d` or semver
+  - implementations MUST NOT use this field to identify specific versions in code, except if the `implementationID` is recognized as an implementation that does not use the `compatibilityVersion` field correctly
+
+If implementations need to match another implementation (e.g. to add implementation-specific workarounds or block known-buggy versions):
+
+- implementations SHOULD check the `implementationID` exactly matches
+- implementations SHOULD restore standard behavior for later (unrecognized) `compatibilityVersion` values 
+- implementations MAY unconditionally match a given `implementationID` (or use other factors) if the `compatibilityVersion` is not used in a way that is fit for purpose, e.g. if the problematic implementation routinely updates it without fixing blocking issues
+
 
 ## Protocol Flow
 
@@ -48,13 +83,13 @@ The client connects to the Unix domain socket at the discovered path.
 
 Upon client connection, the server:
 
-1. SHOULD send **DebugMessage** containing implementation identification (e.g., `"OTD-IPC: 'OTDIPC' v1.0.0 running on 'OpenTabletDriver' v0.6.0"`)
+1. SHOULD send **Hello** containing implementation identification
 2. MUST send **DeviceInfo** message if a tablet device is currently connected
 3. MUST NOT send **DeviceInfo** message if no tablet device is connected
 
 Upon connection, the client:
 
-1. SHOULD send **DebugMessage** containing implementation identification (e.g., "OTDIPC-TestClient" or "OpenKneeboard v2.0.0");
+1. SHOULD send **Hello** containing implementation identification
 
 ### 4. Operational Phase
 
@@ -73,8 +108,8 @@ Client                          Server
   |                               |
   |-- Connect to socket --------->|
   |                               |
-  |-------------- DebugMessage -->|  (client implementation ID and version)
-  |<-- DebugMessage --------------|  (server implementation ID and version)
+  |--------------------- Hello -->|  (client implementation ID and version)
+  |<-- Hello ---------------------|  (server implementation ID and version)
   |<-- DeviceInfo ----------------|  (if device present)
   |                               |
   |<-- State ---------------------|  (on tablet events)
@@ -86,7 +121,9 @@ Client                          Server
   |           ...                 |
 ```
 
-The `DebugMessage` is optional, but strongly recommended for debugging and visbility.
+The `Hello` is optional, but strongly recommended for debugging and visibility.
+
+The client and server can both send `DebugMessage` at any time
 
 ## Message Types
 
@@ -99,6 +136,7 @@ All messages follow the same structure: a header followed by message-specific da
 | **Ping** | 3 | Connection keepalive                  | Server → Client |
 | **DebugMessage** | 4 | Variable-length UTF-8 string          | Server ↔ Client |
 | **Experimental** | 5 | GUID-identified experimental messages | Server ↔ Client |
+| **Hello** | 6 | Implementation identifier | Server ↔ Client |
 
 ### Message Details
 
@@ -194,7 +232,28 @@ The GUID identifies the actual type of the message, and the meaning of the paylo
 
 **Not recommended for production use.** Consider contributing new message types to OTD-IPC instead.
 
-## Binary Format
+##### Hello (ID: 6)
+
+- Header
+- `uint64_t`: protocolVersion, `0xAAYYYYMMDDBB` - e.g. `v2.20260203.01` -> `0x0220260301`
+- 256-byte string: humanReadableName
+- 256-byte string: humanReadableVersion
+- 256-byte string: implementationID
+  - this SHOULD be a developer-readable 'owned' ID, e.g. a domain name, project URL, or `yourusername.github.io/yourproject`
+  - for server → client Hello, this SHOULD match the name in the metadata files
+- `uint8_t`: compatiblityVersion
+  - '1' should be used as an initial value
+  - implementations SHOULD NOT update this value as a regular part of this release process
+  - implementations SHOULD update this value if major issues are fixed that may have led to other implementations choosing to blacklist previous versions
+  - this field is intentionally too small to support reasonable encodings of actual version numbers, to encourage the behavior described above
+
+This message SHOULD be sent by both the client and server shortly after connection.
+
+Implementations MAY log these values.
+Implementations MUST NOT change behavior based on these values, except for:
+
+ - logging and similar metrics
+ - working around known issues in other implementations
 
 ### Encoding Rules
 
@@ -206,7 +265,7 @@ The GUID identifies the actual type of the message, and the meaning of the paylo
   - `uint64_t` / `UInt64`: 64-bit unsigned integer
 - **Floating Point:** IEEE 754 single-precision (32-bit)
 - **Boolean:** Single byte (0 = false, non-zero = true)
-- **Strings:** Fixed-size buffers containing null-terminated UTF-8 text
+- **Strings:** arrays of UTF-8 bytes. Fixed-length strings are null-terminated, UNLESS the string completely fills the field, in which case there is no terminator
 
 ### Size Validation
 
@@ -215,15 +274,14 @@ Implementations MUST:
 2. Verify that the message size is AT LEAST as large as expected for the struct
 3. Accept messages larger than expected (forward compatibility - server may send extended messages)
 
-### Reference Implementations
-
-| Type | C++                                     | C#                              |
 |------|-----------------------------------------|---------------------------------|
 | `enum MessageType` | [.hpp](../include/OTD-IPC/MessageType.hpp) | [.cs](../OTDIPC/V2/MessageType.cs) |
 | `struct Header` | [.hpp](../include/OTD-IPC/Header.hpp)      | [.cs](../OTDIPC/V2/Header.cs)      |
 | ✉️ `struct DeviceInfo` | [.hpp](../include/OTD-IPC/DeviceInfo.hpp)  | [.cs](../OTDIPC/V2/DeviceInfo.cs)  |
 | ✉️ `struct Ping` | [.hpp](../include/OTD-IPC/Ping.hpp)        | [.cs](../OTDIPC/V2/Ping.cs)        |
 | ✉️ `struct State` | [.hpp](../include/OTD-IPC/State.hpp)       | [.cs](../OTDIPC/V2/State.cs)       |
+| ✉️ `struct DebugMessage` | [.hpp](../include/OTD-IPC/DebugMessage.hpp)       | [.cs](../OTDIPC/V2/DebugMessage.cs)       |
+| ✉️ `struct Hello` | [.hpp](../include/OTD-IPC/Hello.hpp)       | [.cs](../OTDIPC/V2/Hello.cs)       |
 
 **Example Client:** See [OTDIPC-TestClient.cpp](../OTDIPC-TestClient/OTDIPC-TestClient.cpp) for a complete C++20 example implementation.
 
@@ -280,17 +338,18 @@ The metadata file is a UTF-8 text file with `\n` line endings, containing `KEY=V
 - `SOCKET`: Absolute path to Unix domain socket
 
 **Optional Fields:**
-- `NAME`: Human-readable server name
-- `SEMVER`: Semantic version string
-- `DEBUG_VERSION`: Detailed version information
+- `PROTOCOL_VERSION`: AA.YYYYMMDD.BB, e.g `2.20260203.01`
+- `HUMAN_READABLE_NAME`: Human-readable server name
+- `HUMAN_READABLE_VERSION`: Human-readable version number
+- `COMPATIBLITY_VERSION`: 0-255 value, suitable for numeric comparisons to identify major bugfixes. If absent, `0` should be assumed
 - `HOMEPAGE`: URL to project homepage
 
 **Example:**
 ```
 ID=otd-ipc.openkneeboard.com
-NAME=OpenTabletDriver OTD-IPC Plugin
-SEMVER=1.0.0+revision.42
-DEBUG_VERSION=OTD-IPC v1.0.0.42/OpenTabletDriver v0.6.4.0
+HUMAN_READABLE_NAME=OpenTabletDriver OTD-IPC Plugin
+HUMAN_READABLE_VERSION=OTD-IPC v1.0.0.42/OpenTabletDriver v0.6.4.0
+COMPATIBLITY_VERSION=1
 HOMEPAGE=https://github.com/OpenKneeboard/OTD-IPC
 SOCKET=/home/user/.local/share/otd-ipc/sock
 ```
@@ -317,6 +376,8 @@ SOCKET=/home/user/.local/share/otd-ipc/sock
 - All implementations MUST ignore unrecognized message types
 - All implementations MUST allow messages to be larger than expected for forwards compatibility
   - implementations MUST ignore the additional bytes
+- All implementations MUST NOT change behavior based on IDs, versions, or other equivalent checks, except to work around known issues
+  - Implementations SHOULD make reasonable efforts to report any discovered issues to the maintainers of the problematic implementation
 - Implementations MUST NOT append additional data to the messages, unless either:
   - the extensions have been accepted and merged into this protocol specification
   - the message type is `Experimental` (5), and the GUID is unique to the implementation
@@ -333,6 +394,7 @@ SOCKET=/home/user/.local/share/otd-ipc/sock
 
 - [ ] Implement discovery mechanism to find socket path
 - [ ] Connect to Unix domain socket
+- [ ] Send Hello with implementation ID and version information on connect
 - [ ] Read messages in a loop
 - [ ] Parse Header from each message
 - [ ] Validate `size` field matches bytes read
@@ -349,7 +411,7 @@ SOCKET=/home/user/.local/share/otd-ipc/sock
 - [ ] Publish discovery metadata file
 - [ ] Set default.txt if it doesn't exist
 - [ ] Accept client connection (one at a time)
-- [ ] Send DebugMessage with implementation ID and version information on connect
+- [ ] Send Hello with implementation ID and version information on connect
 - [ ] Send DeviceInfo on connect (if device present)
 - [ ] Send State messages when tablet state changes
 - [ ] Send Ping messages periodically

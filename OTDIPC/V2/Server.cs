@@ -20,8 +20,7 @@ namespace OTDIPC.V2;
 public class Server : ServerBase
 {
     private const string MyImplementationId = "otd-ipc.openkneeboard.com";
-
-    private readonly string _implementationIdDebugMessage = GenerateImplementationIdDebugMessage();
+    private const UInt64 ProtocolVersion = 0x02_20260205_01;
 
     Ping _ping = new();
     Socket? _connection;
@@ -241,18 +240,38 @@ public class Server : ServerBase
         {
             var message = Encoding.UTF8.GetString(payload);
             Log.Write("otd-ipc-v2", $"Client debug message: {message}");
+            return;
         }
-        else
+
+        if (header.MessageType == V2.MessageType.Hello && payload != null)
         {
-            // DebugMessage is the only expected type at the moment
-            Log.Write("otd-ipc-v2", $"Client sent unexpected message type: {(uint)header.MessageType}");
+            var fullMessage = new byte[header.Size];
+            MemoryMarshal.Write(fullMessage, ref header);
+            payload.CopyTo(fullMessage, Marshal.SizeOf<V2.Header>());
+            var msg = MemoryMarshal.AsRef<V2.Hello>(fullMessage);
+            Log.Write("otd-ipc-v2",
+                $"Client hello: {msg.HumanReadableName} {msg.HumanReadableVersion} (proto 0x{msg.ProtocolVersion:x}, ID '{msg.ImplementationId}'/ cv {msg.CompatibilityVersion})");
+            return;
         }
+
+
+        Log.Write("otd-ipc-v2", $"Client sent unexpected message type: {(uint)header.MessageType}");
     }
 
     void OnClientConnected()
     {
         Log.Write("otd-ipc-v2", "Sending hello");
-        this.SendDebugMessage(_implementationIdDebugMessage);
+        var self = Assembly.GetExecutingAssembly().GetName();
+        var otd = Assembly.GetEntryAssembly()?.GetName();
+        var hello = new Hello
+        {
+            ProtocolVersion = ProtocolVersion,
+            ImplementationId = MyImplementationId,
+            HumanReadableName = $"`{self.Name}/{otd?.Name}`",
+            HumanReadableVersion = $"`v{self.Version}/OTDv{otd?.Version}`",
+            CompatibilityVersion = 1,
+        };
+        SendMessage(hello);
         if (!_deviceInfo.HasValue)
         {
             Log.Write("otd-ipc-v2", "Device not seen - not sending device info");
@@ -313,11 +332,11 @@ public class Server : ServerBase
             var entry = Assembly.GetEntryAssembly()?.GetName();
             var contents = $@"
 ID={MyImplementationId}
-NAME=OpenTabletDriver OTD-IPC Plugin
-SEMVER={semver}
-DEBUG_VERSION=OTD-IPC v{version}/{entry?.Name} v{entry?.Version}
+SOCKET={{GetSocketPath()}}
+HUMAN_READABLE_NAME=OpenTabletDriver OTD-IPC Plugin
+HUMAN_READABLE_VERSION=v{version}/{entry?.Name} v{entry?.Version}
 HOMEPAGE=https://github.com/OpenKneeboard/OTD-IPC
-SOCKET={GetSocketPath()}
+COMPATIBILITY_VERSION=1
 ".TrimStart();
             File.WriteAllText(metadataFile, contents);
         }
@@ -346,12 +365,5 @@ SOCKET={GetSocketPath()}
         }
 
         Log.Write("otd-ipc-v2", $"published discovery defaults file: {defaultPath}");
-    }
-
-    private static string GenerateImplementationIdDebugMessage()
-    {
-        var self = Assembly.GetExecutingAssembly().GetName();
-        var otd = Assembly.GetEntryAssembly()?.GetName();
-        return $"OTD-IPC: `{self.Name}` v{self.Version} running on `{otd?.Name}` v{otd?.Version}";
     }
 }

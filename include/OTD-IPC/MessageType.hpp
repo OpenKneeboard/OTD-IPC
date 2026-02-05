@@ -29,6 +29,7 @@ namespace OTDIPC::inline V2::Messages {
      * without a risk of conflicts.
      */
     Experimental = 5,
+    Hello = 6,
   };
 
 }

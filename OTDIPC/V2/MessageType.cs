@@ -25,5 +25,6 @@ namespace OTDIPC.V2
          * to support private experimentation without a risk of conflicts.
          */
         Experimental = 5,
+        Hello = 6,
     }
 }
