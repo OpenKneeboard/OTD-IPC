@@ -332,7 +332,7 @@ public class Server : ServerBase
             var entry = Assembly.GetEntryAssembly()?.GetName();
             var contents = $@"
 ID={MyImplementationId}
-SOCKET={{GetSocketPath()}}
+SOCKET={GetSocketPath()}
 HUMAN_READABLE_NAME=OpenTabletDriver OTD-IPC Plugin
 HUMAN_READABLE_VERSION=v{version}/{entry?.Name} v{entry?.Version}
 HOMEPAGE=https://github.com/OpenKneeboard/OTD-IPC
