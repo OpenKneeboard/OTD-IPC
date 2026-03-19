@@ -6,6 +6,8 @@
 
 This document describes the OTD-IPC V2 protocol used for communication between OpenTabletDriver and client applications.
 
+**Warning:** As of 2026-03-19, all published releases of OTD-IPC implement the v1 protocol, not this protocol.
+
 ## Overview
 
 The V2 protocol enables exclusive, real-time access to tablet state from OpenTabletDriver. When a client connects, the active OpenTabletDriver output mode is disabled, giving the client direct access to tablet input.
