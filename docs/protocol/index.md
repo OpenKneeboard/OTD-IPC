@@ -253,7 +253,7 @@ The GUID identifies the actual type of the message, and the meaning of the paylo
 ##### Hello (ID: 6)
 
 - Header
-- `uint64_t`: protocolVersion, `0xAAYYYYMMDDBB` - e.g. `v2.20260203.01` -> `0x0220260301`
+- `uint64_t`: protocolVersion, `0xAAYYYYMMDDBB` - e.g. `v2.20260405.01` -> `0x022026040501`
 - 256-byte string: humanReadableName
 - 256-byte string: humanReadableVersion
 - 256-byte string: implementationID
