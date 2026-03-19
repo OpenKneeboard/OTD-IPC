@@ -10,7 +10,23 @@ This document describes the OTD-IPC V2 protocol used for communication between O
 
 ## Overview
 
-The V2 protocol enables exclusive, real-time access to tablet state from OpenTabletDriver. When a client connects, the active OpenTabletDriver output mode is disabled, giving the client direct access to tablet input.
+The V2 protocol enables exclusive background access to tablet state from OpenTabletDriver. When a client connects, the active OpenTabletDriver output mode is disabled, giving the client direct access to tablet input.
+
+If your application does not *require* exclusive background access to the tablet, you should not use OTD-IPC; instead, you should look at:
+
+- tablet/pen/'pointer' input APIs in the UI framework you are using
+- platform-specific input APIs such as Windows Ink or WinTab
+
+Exclusive background access ignores most user settings and plugins, including bindings, smoothing, etc; most applications do not want this behavior.
+
+OpenKneeboard is an example of an application that *does* require this kind of access to the tablet:
+
+- as a virtual reality tool, monitors and windows are not visible to the user; monitor mapping and other similar options do not make sense
+- the OS cursor is not visible in VR, so moving the OS cursor does not make sense, and neither do related behaviors like 'window under cursor'
+- as an external overlay for games, it must be able to access the tablet even when the game window is on top of it
+- it is essentially treating the tablet as a game controller
+
+However, because of these choices, OpenKneeboard does need to reimplement some basic optional features that are usually provided by the driver, such as rotation and bindings.
 
 ### Transport Layer
 
