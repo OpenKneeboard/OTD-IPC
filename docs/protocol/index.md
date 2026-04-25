@@ -2,11 +2,9 @@
 
 **Version:** v2.20260205.01
 
-**Status:** Draft
+**Status:** Production use
 
 This document describes the OTD-IPC V2 protocol used for communication between OpenTabletDriver and client applications.
-
-**Warning:** As of 2026-03-19, all published releases of OTD-IPC implement the v1 protocol, not this protocol.
 
 ## Overview
 
