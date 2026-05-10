@@ -4,10 +4,6 @@
 
     Create the metadata JSON for a release in a checkout of the OpenTabletDriver/Plugin-Repository repo.
 
-.PARAMETER GitHubToken
-
-    GitHub API token
-
 .PARAMETER PluginRepositoryPath
 
     Path to a checkout of OpenTabletDriver/Plugin-Repository
@@ -27,43 +23,27 @@ param(
 )
 
 $Repo = "OpenKneeboard/OTD-IPC"
-$AssetPrefix = "OpenKneeboard-OTD-IPC-"
+$AssetPrefix = "OpenKneeboard-OTD-IPC"
+$FilePattern = "${AssetPrefix}*.zip"
 $OutputName = "$($Repo.Split('/')[-1]).json"
 
-$DownloadHeaders = @{
-  "User-Agent" = "${Repo} - $((Get-Item $PSCommandPath).Name) v0.0.0-filehash.$((Get-FileHash $PSCommandPath).Hash)";
-}
-$ApiHeaders = $DownloadHeaders + @{
-  "Accept" = "application/vnd.github+json";
-  "X-GitHub-Api-Version" = "2022-11-28";
-}
-if ("${GitHubToken}" -ne "") {
-  $ApiHeaders['Authorization'] = $GitHubToken
-  $DownloadHeaders['Authorization'] = $GitHubToken
-}
-
-$Release = (Invoke-WebRequest -Uri https://api.github.com/repos/${Repo}/releases -Headers $ApiHeaders).Content
-  | ConvertFrom-Json
-  | Where-Object -Not -Property 'prerelease'
-  | Sort-Object -Descending -Property { [System.Management.Automation.SemanticVersion] ($_.tag_name -replace '^v' -replace 'beta','beta.') }
-  | Select-Object -First 1
-
-$FilePattern = "${AssetPrefix}$($Release.tag_name)*.zip"
+$Release = (gh release view --json assets) | ConvertFrom-Json
 
 $Asset = $Release.assets
   | Where-Object -FilterScript { $_.name -like $FilePattern }
 
-$DownloadUrl = $Asset.browser_download_url
+$DownloadPath = Join-Path $env:TEMP "OTD-IPC-Update-$($Asset.name)" -Force
+$DownloadUrl = $Asset.url
 
-$DownloadPath = Join-Path $env:TEMP $Asset.name
-
-Invoke-WebRequest `
-  -Uri $DownloadUrl `
-  -Headers $DownloadHeaders `
-  -OutFile $DownloadPath
+if (-not (Test-Path -Path "$DownloadPath")) {
+  gh release download -O "$DownloadPath" -p "$FilePattern"
+}
 
 $BaseName = (Get-Item $DownloadPath).BaseName
 $Extracted = Join-Path $env:TEMP $BaseName
+if (Test-Path -Path $Extracted) {
+  Remove-Item -Path $Extracted -Recurse -Force
+}
 Expand-Archive -Path $DownloadPath -DestinationPath $Extracted
 
 $Metadata = Get-Content (Join-Path $Extracted "metadata.json")
@@ -76,6 +56,11 @@ $Metadata += @{
 
 Write-Output "Release Metadata:"
 Write-Output $Metadata
+
+if ("$PluginRepositoryPath" -eq "") {
+  echo "`nNo OTD PluginRepository path specified, nothing to do."
+  return
+}
 
 $OutputDirectory = Join-Path `
   (Get-Item $PluginRepositoryPath).FullName `
@@ -92,4 +77,7 @@ if (-not (Test-Path $OutputDirectory)) {
 
 $Metadata
   | ConvertTo-Json -Depth 8
-  | Out-File -Encoding utf8NoBOM -FilePath $OutputPath
+  | % { ($_ -replace "`r`n","`n") + "`n" } # unix newlines with newline at EOF
+  | Out-File -Encoding utf8NoBOM -FilePath $OutputPath -NoNewline # no auto CRLF
+
+echo "`nUpdated metadata in $OutputPath`n`nNext, commit and create a pull request!"
