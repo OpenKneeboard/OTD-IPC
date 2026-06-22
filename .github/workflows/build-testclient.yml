@@ -9,7 +9,7 @@ jobs:
     name: Build Test Client (${{matrix.os}})
     runs-on: ${{matrix.os}}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Configure
         shell: pwsh
         working-directory: OTDIPC-TestClient
